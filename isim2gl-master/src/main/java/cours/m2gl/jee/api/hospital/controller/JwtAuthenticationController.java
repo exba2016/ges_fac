@@ -1,9 +1,11 @@
 package cours.m2gl.jee.api.hospital.controller;
 
 import cours.m2gl.jee.api.hospital.config.JwtTokenUtil;
+import cours.m2gl.jee.api.hospital.dao.UserRepository;
 import cours.m2gl.jee.api.hospital.model.ErrorResponse;
 import cours.m2gl.jee.api.hospital.model.JwtRequest;
 import cours.m2gl.jee.api.hospital.model.ResponseJwt;
+import cours.m2gl.jee.api.hospital.model.User;
 import cours.m2gl.jee.api.hospital.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -31,6 +33,8 @@ public class JwtAuthenticationController {
     private JwtTokenUtil jwtTokenUtil;
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+    @Autowired
+    private UserRepository userRepository;
 
 
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
@@ -58,6 +62,7 @@ public class JwtAuthenticationController {
             System.out.println(jwt);
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             if(userDetails != null)
+                User u=(User)userRepository.findByUsername(userDetails.getUsername());
                 return ResponseEntity.ok(new ResponseJwt(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
             return ResponseEntity.ok(new ErrorResponse("INVALID_CREDENTIALS"));
         } catch (DisabledException e) {

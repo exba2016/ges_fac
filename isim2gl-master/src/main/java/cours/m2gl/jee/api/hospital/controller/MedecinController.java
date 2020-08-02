@@ -1,23 +1,13 @@
 package cours.m2gl.jee.api.hospital.controller;
 
-import cours.m2gl.jee.api.hospital.dao.ClientRepository;
-import cours.m2gl.jee.api.hospital.model.ErrorResponse;
-import cours.m2gl.jee.api.hospital.service.ClientService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping(value = "/medecin")
 @CrossOrigin
-public class ClientController {
-    @Autowired
+public class MedecinController {
+    /*@Autowired
     private ClientService medecinService;
 
     @Autowired
@@ -75,4 +65,6 @@ public class ClientController {
     public @ResponseBody List<Medecin> findAll(){
         return medecinService.findAll();
     }
+
+     */
 }

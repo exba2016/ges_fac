@@ -3,10 +3,8 @@ package cours.m2gl.jee.api.hospital.service;
 import cours.m2gl.jee.api.hospital.dao.RoleRepository;
 import cours.m2gl.jee.api.hospital.dao.UserRepository;
 import cours.m2gl.jee.api.hospital.model.Role;
-import cours.m2gl.jee.api.hospital.model.RoleName;
 import cours.m2gl.jee.api.hospital.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -46,7 +43,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             l.add(user.getRole());
             org.springframework.security.core.userdetails.User u =
                     new org.springframework.security.core.userdetails.
-                            User(user.getUsername(),user.getPassword(),
+                            User(
+                                    user.getUsername(),
+                            user.getPassword(),
                     true,true,
                             true,true,
                             getAuthorities(l));

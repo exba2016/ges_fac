@@ -7,6 +7,8 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
@@ -36,12 +38,32 @@ public class User{
     @Size(min=6, max = 100)
     private String password;
 
+    @NotBlank
+    @Size(min=3, max = 50)
+    private String nom;
+    @NotBlank
+    @Size(min=3, max = 50)
+    private String telephone;
+    @NotBlank
+    @Size(min=3, max = 50)
+    private String adresse;
+
+    @Size(min=4, max = 30)
+    private String statuts;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
+
+
     @JsonIgnoreProperties("users")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;
 
-    public User() {}
+    @JsonIgnoreProperties("user")
+    @OneToMany(mappedBy = "user")
+    private List<Commande> commandes;
 
     public Long getId() {
         return id;
@@ -75,11 +97,67 @@ public class User{
         this.password = password;
     }
 
+    public String getNom() {
+        return nom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
+    public String getAdresse() {
+        return adresse;
+    }
+
+    public void setAdresse(String adresse) {
+        this.adresse = adresse;
+    }
+
+    public String getStatuts() {
+        return statuts;
+    }
+
+    public void setStatuts(String statuts) {
+        this.statuts = statuts;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public Role getRole() {
         return role;
     }
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public List<Commande> getCommandes() {
+        return commandes;
+    }
+
+    public void setCommandes(List<Commande> commandes) {
+        this.commandes = commandes;
     }
 }
