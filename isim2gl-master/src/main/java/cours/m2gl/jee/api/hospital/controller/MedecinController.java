@@ -1,14 +1,8 @@
 package cours.m2gl.jee.api.hospital.controller;
 
-import cours.m2gl.jee.api.hospital.dao.MedecinRepository;
+import cours.m2gl.jee.api.hospital.dao.ClientRepository;
 import cours.m2gl.jee.api.hospital.model.ErrorResponse;
-import cours.m2gl.jee.api.hospital.model.Medecin;
-import cours.m2gl.jee.api.hospital.model.Service;
-import cours.m2gl.jee.api.hospital.model.Specialite;
-import cours.m2gl.jee.api.hospital.service.IServiceService;
-import cours.m2gl.jee.api.hospital.service.ISpecialiteService;
-import cours.m2gl.jee.api.hospital.service.MedecinService;
-import cours.m2gl.jee.api.hospital.service.ServiceService;
+import cours.m2gl.jee.api.hospital.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,12 +16,12 @@ import java.util.Optional;
 @Controller
 @RequestMapping(value = "/medecin")
 @CrossOrigin
-public class MedecinController {
+public class ClientController {
     @Autowired
-    private MedecinService medecinService;
+    private ClientService medecinService;
 
     @Autowired
-    private MedecinRepository medecinRepository;
+    private ClientRepository clientRepository;
 
     @Autowired
     private IServiceService serviceService;
