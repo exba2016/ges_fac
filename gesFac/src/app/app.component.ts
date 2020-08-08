@@ -1,6 +1,7 @@
-import {Component, OnInit} from '@angular/core';
-import {NavigationEnd, Router} from '@angular/router';
-import {SidebarService} from './sidebar/sidebar.service';
+import { Component, OnInit } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { SidebarService } from './sidebar/sidebar.service';
+import { GlobalService } from './pages/services/global.service';
 
 
 @Component({
@@ -8,19 +9,34 @@ import {SidebarService} from './sidebar/sidebar.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit {
   title = 'gesFac';
   url: string;
   constructor(
     public sidebarservice: SidebarService,
+    public globalService: GlobalService,
     private router: Router) { }
-  ngOnInit(): void{
+  ngOnInit(): void {
     this.router.events.forEach(event => {
       if (event instanceof NavigationEnd) {
         this.url = this.router.url;
         console.log(this.router.url);
-        // this.router.navigate(['/login']);
+        let user = localStorage.getItem('user');
+        if (!user) {
+          if (!this.globalService.user)
+            this.router.navigate(['/login']);
 
+        } else {
+          user = JSON.parse(user);
+          console.log("retrive user ", user);
+          this.globalService.user = user;
+        }
+        for(let m of this.sidebarservice.menus){
+          if(m.url && m.url===this.url && m.auth.role<this.globalService.user.role.name){
+            this.router.navigate(['/login']);
+          }
+        }
+        // this.router.navigate(['/login']);
       }
     });
   }

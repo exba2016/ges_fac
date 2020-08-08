@@ -6,145 +6,72 @@ import { Injectable } from '@angular/core';
 export class SidebarService {
   toggled = false;
   _hasBackgroundImage = true;
+  authList = [
+    {
+      role: 'ROLE_ADMIN',
+      auth: 0
+    },
+    {
+      role: 'ROLE_CLIENT',
+      auth: 1
+    }
+
+  ];
   menus = [
     {
       title: 'general',
-      type: 'header'
+      type: 'header',
+      auth: this.authList[1]
     },
     {
       title: 'Dashboard',
       icon: 'fa fa-tachometer-alt',
       active: false,
-      type: 'dropdown',
-      badge: {
-        text: 'New ',
-        class: 'badge-warning'
-      },
-      submenus: [
-        {
-          title: 'Dashboard 1',
-          badge: {
-            text: 'Pro ',
-            class: 'badge-success'
-          }
-        },
-        {
-          title: 'Dashboard 2'
-        },
-        {
-          title: 'Dashboard 3'
-        }
-      ]
+      type: 'simple',
+      url: '/accueil',
+      auth: this.authList[0]
     },
     {
-      title: 'E-commerce',
+      title: 'Gerer produits',
       icon: 'fa fa-shopping-cart',
       active: false,
       type: 'dropdown',
+      auth: this.authList[1],
       badge: {
         text: '3',
         class: 'badge-danger'
       },
       submenus: [
         {
-          title: 'Products',
+          title: 'Produits',
+          url: '/produit',
+          auth: this.authList[1]
         },
         {
-          title: 'Orders'
+          title: 'Commande',
+          url: '/commande',
+          auth: this.authList[1]
         },
         {
-          title: 'Credit cart'
+          title: 'Paiement',
+          url: '/paiement',
+          auth: this.authList[1]
         }
       ]
     },
     {
-      title: 'Components',
+      title: 'Gerer utilisateurs',
       icon: 'far fa-gem',
       active: false,
-      type: 'dropdown',
-      submenus: [
-        {
-          title: 'General',
-        },
-        {
-          title: 'Panels'
-        },
-        {
-          title: 'Tables'
-        },
-        {
-          title: 'Icons'
-        },
-        {
-          title: 'Forms'
-        }
-      ]
-    },
-    {
-      title: 'Charts',
-      icon: 'fa fa-chart-line',
-      active: false,
-      type: 'dropdown',
-      submenus: [
-        {
-          title: 'Pie chart',
-        },
-        {
-          title: 'Line chart'
-        },
-        {
-          title: 'Bar chart'
-        },
-        {
-          title: 'Histogram'
-        }
-      ]
-    },
-    {
-      title: 'Maps',
-      icon: 'fa fa-globe',
-      active: false,
-      type: 'dropdown',
-      submenus: [
-        {
-          title: 'Google maps',
-        },
-        {
-          title: 'Open street map'
-        }
-      ]
-    },
-    {
-      title: 'Extra',
-      type: 'header'
-    },
-    {
-      title: 'Documentation',
-      icon: 'fa fa-book',
-      active: false,
       type: 'simple',
-      badge: {
-        text: 'Beta',
-        class: 'badge-primary'
-      },
-    },
-    {
-      title: 'Calendar',
-      icon: 'fa fa-calendar',
-      active: false,
-      type: 'simple'
-    },
-    {
-      title: 'Examples',
-      icon: 'fa fa-folder',
-      active: false,
-      type: 'simple'
+      auth: this.authList[0],
+      url: '/users'
     }
   ];
   constructor() { }
 
   toggle() {
-    this.toggled = ! this.toggled;
+    this.toggled = !this.toggled;
   }
 
   getSidebarState() {

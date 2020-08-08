@@ -43,6 +43,8 @@ public class Commande {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
+    private boolean isValide;
+
     @JsonIgnoreProperties("commande")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
@@ -56,6 +58,13 @@ public class Commande {
     @OneToMany(mappedBy = "commande")
     private List<Paiement>paiements;
 
+    public boolean isValide() {
+        return isValide;
+    }
+
+    public void setValide(boolean valide) {
+        isValide = valide;
+    }
 
     public Long getId() {
         return id;

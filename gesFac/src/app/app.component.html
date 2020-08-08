@@ -1,5 +1,5 @@
 
-<div class="page-wrapper" [ngClass]="{'toggled' : getSideBarState()}">
+<div *ngIf="globalService.user && globalService.user.username" class="page-wrapper" [ngClass]="{'toggled' : getSideBarState()}">
   <app-sidebar></app-sidebar>
   <main class="page-content">
     <div class="container-fluid">
@@ -16,4 +16,15 @@
   </main>
 
   <!-- <a href="https://github.com/azouaoui-med/angular-pro-sidebar"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a> -->
+</div>
+
+<div *ngIf="!(globalService.user && globalService.user.username)">
+  <div class="container-fluid">
+    <div class="row">
+      <div class=" offset-md-4">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+    
+  </div>
 </div>

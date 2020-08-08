@@ -28,6 +28,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+
         User user = userRepository.findByUsername(s);
         if(user != null)
         {
@@ -60,6 +61,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         for(Object role : roles)
         {
             Role l = (Role)role;
+            System.out.println("Test auth "+l.getName().name());
             authorities.add(new SimpleGrantedAuthority(l.getName().name()));
         }
         return authorities ;

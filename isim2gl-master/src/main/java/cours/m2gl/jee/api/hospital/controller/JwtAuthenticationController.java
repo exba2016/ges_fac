@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public class JwtAuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody JwtRequest authenticationRequest) {
+
         System.out.println(authenticationRequest.getUsername()+" - "+authenticationRequest.getPassword());
         final UserDetails details = userDetailsService
                 .loadUserByUsername(authenticationRequest.getUsername());
@@ -61,9 +63,10 @@ public class JwtAuthenticationController {
             String jwt = jwtTokenUtil.generateToken(details);
             System.out.println(jwt);
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            if(userDetails != null)
-                User u=(User)userRepository.findByUsername(userDetails.getUsername());
+            if(userDetails != null){
                 return ResponseEntity.ok(new ResponseJwt(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
+            }
+
             return ResponseEntity.ok(new ErrorResponse("INVALID_CREDENTIALS"));
         } catch (DisabledException e) {
             return ResponseEntity.ok(new ErrorResponse("USER_DISABLED"));
@@ -72,4 +75,33 @@ public class JwtAuthenticationController {
         }
 
     }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/users")
+    public @ResponseBody
+    User findUser(@RequestBody String username){
+        return userRepository.findByUsername(username);
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/encodePassword")
+    public @ResponseBody
+    Object encodePassword(@RequestBody String password){
+        System.out.println("pass "+password);
+        Object o=new BCryptPasswordEncoder().encode(password);
+        return o;
+    }
+
+
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @PutMapping("/changePassword/{id}")
+    User changeUserPassword(@RequestBody String password, @PathVariable Long id) {
+        System.out.println("password "+password);
+        return userRepository
+                .findById(id)
+                .map(u -> {
+                    u.setPassword(new BCryptPasswordEncoder().encode(password));
+                    u.setStatuts("active");
+                    return userRepository.save(u);
+                }).get();
+    }
+
 }

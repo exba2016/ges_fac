@@ -2,8 +2,8 @@
 -- version 5.0.2
 -- https://www.phpmyadmin.net/
 --
--- Hôte : 127.0.0.1
--- Généré le : Dim 02 août 2020 à 17:40
+-- Hôte : localhost
+-- Généré le : jeu. 06 août 2020 à 15:19
 -- Version du serveur :  10.4.13-MariaDB
 -- Version de PHP : 7.2.32
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de données : `projet_devoir`
+-- Base de données : `projet_spring_angular`
 --
 
 -- --------------------------------------------------------
@@ -33,6 +33,7 @@ CREATE TABLE `commande` (
   `createdAt` datetime DEFAULT NULL,
   `dateLivraison` datetime DEFAULT NULL,
   `isPayed` bit(1) NOT NULL,
+  `isValide` bit(1) NOT NULL,
   `statuts` varchar(30) DEFAULT NULL,
   `totalHT` double NOT NULL,
   `totalTTC` double NOT NULL,
@@ -79,12 +80,13 @@ CREATE TABLE `produit` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `produitcommande`
+-- Structure de la table `produitCommande`
 --
 
-CREATE TABLE `produitcommande` (
+CREATE TABLE `produitCommande` (
   `id` bigint(20) NOT NULL,
   `createdAt` datetime DEFAULT NULL,
+  `dateLivraison` datetime DEFAULT NULL,
   `prix` double NOT NULL,
   `qte` double NOT NULL,
   `statuts` varchar(30) DEFAULT NULL,
@@ -137,7 +139,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `adresse`, `createdAt`, `email`, `nom`, `password`, `statuts`, `telephone`, `updatedAt`, `username`, `role_id`) VALUES
-(1, 'MEDINA', '2020-08-02 14:00:11', 'ex2016@gmail.com', 'ABDOULBASSUR ABDOU SOIMADOU', '$2a$10$kl8r0f9sRG7EAB0DSfOOc.BFXh9Uaz3TD0s57OoQi7FjDJFWucRXW', 'active', '772643456', '2020-08-02 14:00:11', 'ex2016', 2);
+(1, 'MEDINA', '2020-08-02 14:00:11', 'ex2016@gmail.com', 'ABDOULBASSUR ABDOU SOIMADOU', '$2a$10$kl8r0f9sRG7EAB0DSfOOc.BFXh9Uaz3TD0s57OoQi7FjDJFWucRXW', 'active', '772643456', '2020-08-02 14:00:11', 'admin', 2);
 
 --
 -- Index pour les tables déchargées
@@ -167,9 +169,9 @@ ALTER TABLE `produit`
   ADD UNIQUE KEY `UK4c9pycvudiq9gb9e6gij916y6` (`code`);
 
 --
--- Index pour la table `produitcommande`
+-- Index pour la table `produitCommande`
 --
-ALTER TABLE `produitcommande`
+ALTER TABLE `produitCommande`
   ADD PRIMARY KEY (`id`),
   ADD KEY `FK1y63n81im8u0nvabcldvq8q09` (`commande_id`),
   ADD KEY `FKgrl22mk5flfycn5x6hshay0e7` (`produit_id`);
@@ -213,9 +215,9 @@ ALTER TABLE `produit`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `produitcommande`
+-- AUTO_INCREMENT pour la table `produitCommande`
 --
-ALTER TABLE `produitcommande`
+ALTER TABLE `produitCommande`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
@@ -247,9 +249,9 @@ ALTER TABLE `paiement`
   ADD CONSTRAINT `FK7154xu8wk0uya9b09dg8pcedm` FOREIGN KEY (`commande_id`) REFERENCES `commande` (`id`);
 
 --
--- Contraintes pour la table `produitcommande`
+-- Contraintes pour la table `produitCommande`
 --
-ALTER TABLE `produitcommande`
+ALTER TABLE `produitCommande`
   ADD CONSTRAINT `FK1y63n81im8u0nvabcldvq8q09` FOREIGN KEY (`commande_id`) REFERENCES `commande` (`id`),
   ADD CONSTRAINT `FKgrl22mk5flfycn5x6hshay0e7` FOREIGN KEY (`produit_id`) REFERENCES `produit` (`id`);
 

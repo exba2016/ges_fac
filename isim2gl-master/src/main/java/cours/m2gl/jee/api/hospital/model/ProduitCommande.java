@@ -22,6 +22,7 @@ public class ProduitCommande {
     private Date createdAt;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
+    private Date dateLivraison;
 
     @JsonIgnoreProperties("produitCommande")
     @ManyToOne(fetch = FetchType.EAGER)
@@ -31,6 +32,14 @@ public class ProduitCommande {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "commande_id")
     private Commande commande;
+
+    public Date getDateLivraison() {
+        return dateLivraison;
+    }
+
+    public void setDateLivraison(Date dateLivraison) {
+        this.dateLivraison = dateLivraison;
+    }
 
     public Long getId() {
         return id;
