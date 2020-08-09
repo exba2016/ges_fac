@@ -6,6 +6,7 @@ import { GlobalService } from '../pages/services/global.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ChangePasswordComponent } from '../pages/modals/change-password/change-password.component';
 import { LoginService } from '../pages/services/login.service';
+import { AlertService } from '../pages/services/alert.service';
 // import { MenusService } from './menus.service';
 
 @Component({
@@ -26,7 +27,8 @@ export class SidebarComponent implements OnInit {
     public sidebarservice: SidebarService,
     public globalService: GlobalService,
     private modalService: NgbModal,
-    private loginService:LoginService,
+    private loginService: LoginService,
+    public alertService: AlertService,
     private router: Router) {
     this.menus = sidebarservice.getMenuList();
   }
@@ -72,17 +74,28 @@ export class SidebarComponent implements OnInit {
     const modalRef = this.modalService.open(ChangePasswordComponent);
     modalRef.componentInstance.passEntry.subscribe((receivedData) => {
       console.log("after change password valide ", receivedData);
-      
-      let user = this.globalService.user;
-      this.loginService.changePassword(receivedData.newPassword, this.globalService.user.id).subscribe((rsss) => {
-        localStorage.removeItem("user");
-        localStorage.setItem("user", JSON.stringify(rsss));
-        this.globalService.user = rsss;
-      },
-        err => {
-          console.log(err);
+      if (this.globalService.user.statuts === 'active') {
+        this.loginService.encodePassword(receivedData.oldPassword, this.globalService.user.id).subscribe((rs) => {
+          console.log("encode ", rs);
+          if (rs == false) {
+            this.alertService.alert("L'ancien mot de passe saisi est incorrect, veuillez entrer le bon mot de passe", "warning");
+          } else {
+            let user = this.globalService.user;
+            this.loginService.changePassword(receivedData.newPassword, this.globalService.user.id).subscribe((rsss) => {
+              localStorage.removeItem("user");
+              localStorage.setItem("user", JSON.stringify(rsss));
+              this.globalService.user = rsss;
+              this.alertService.alert("Changement du mot de passe éffectué avec succès !", "success");
+            },
+              err => {
+                console.log(err);
+              });
+
+
+          }
         });
 
+      }
 
 
       /*const service = { id: receivedData.service, libelle: '' };

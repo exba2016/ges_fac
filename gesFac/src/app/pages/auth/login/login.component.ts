@@ -39,6 +39,7 @@ export class LoginComponent implements OnInit {
       .subscribe((res) => {
         console.log('login', res);
         if (res.body.status !== 'error') {
+        
           this.loginService.saveToken(res.body);
           this.loginService.findUser(res.body.username).subscribe((rs) => {
             console.log("user ", rs);
@@ -91,7 +92,9 @@ export class LoginComponent implements OnInit {
             } else {
               this.router.navigate(['accueil']);
             }
-          })
+          },error=>{
+            this.alertService.alert("Echec de l'authentification, l'username ou le mot de passe est incorrect !","warning");
+          });
 
 
 
@@ -99,14 +102,17 @@ export class LoginComponent implements OnInit {
         else {
           if (res.body.error === 'INVALID_USERNAME') {
             this.message = 'Utilisateur inexistant';
+            this.alertService.alert("Echec de l'authentification, l'username ou le mot de passe est incorrect !","warning");
           }
           else if (res.body.error === 'BAD_CREDENTIALS') {
             this.message = 'Mot de passe incorect';
+            this.alertService.alert("Echec de l'authentification, l'username ou le mot de passe est incorrect !","warning");
           }
         }
       },
         err => {
           console.log(err);
+          this.alertService.alert("Echec de l'authentification, l'username ou le mot de passe est incorrect !","warning");
         });
   }
 

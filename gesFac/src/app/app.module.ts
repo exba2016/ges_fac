@@ -4,7 +4,7 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { GererCommandeComponent } from './pages/list/gerer-commande/gerer-commande.component';
 import { LoginComponent } from './pages/auth/login/login.component';
 import { PERFECT_SCROLLBAR_CONFIG, PerfectScrollbarConfigInterface, PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { GererProduitComponent } from './pages/list/gerer-produit/gerer-produit.component';
@@ -20,6 +20,9 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AppComponent } from './app.component';
 import { GererUtilisateurComponent } from './pages/list/gerer-utilisateur/gerer-utilisateur.component';
 import { ToastrModule } from 'ngx-toastr';
+import { NgxDatatableModule } from '@swimlane/ngx-datatable';
+import { UserCreateUpdateComponent } from './pages/modals/user-create-update/user-create-update.component';
+import { ProduitCreateUpdateComponent } from './pages/modals/produit-create-update/produit-create-update.component';
 
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
@@ -37,7 +40,9 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     GererCommandeComponent,
     GererPaiementComponent,
     AccueilComponent,
-    ChangePasswordComponent
+    ChangePasswordComponent,
+    UserCreateUpdateComponent,
+    ProduitCreateUpdateComponent
   ],
   imports: [
     BrowserModule,
@@ -49,6 +54,13 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
+    NgxDatatableModule.forRoot({
+      messages: {
+        emptyMessage: 'No data to display', // Message to show when array is presented, but contains no values
+        totalMessage: 'total', // Footer total message
+        selectedMessage: 'selected' // Footer selected message
+      }
+    }),
     ToastrModule.forRoot({
     positionClass: 'toast-top-center'
     }), // ToastrModule added
@@ -63,6 +75,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     multi: true
   }],
   bootstrap: [AppComponent],
-  entryComponents: [ChangePasswordComponent]
+  entryComponents: [ChangePasswordComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule { }

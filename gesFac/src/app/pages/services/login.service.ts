@@ -17,12 +17,25 @@ export class LoginService {
     return this.http.post<any>(this.apiConfig.REST_API_SERVER + '/users',username);
   }
 
-  public encodePassword(password:string ):any{
-    return this.http.post<any>(this.apiConfig.REST_API_SERVER+'/encodePassword',password,{observe: 'response'});
+  public encodePassword(password:string,id:number):any{
+    return this.http.put<any>(this.apiConfig.REST_API_SERVER+'/encodePassword/'+id,password);
   }
   public changePassword(password:string,id:number):any{
 
     return this.http.put<any>(this.apiConfig.REST_API_SERVER+'/changePassword/'+id,password);
+  }
+
+  public getAllUser():any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/users");
+  }
+  public addUser(user:any):any{
+    return this.http.post<any>(this.apiConfig.REST_API_SERVER+"/users/add",user);
+  }
+  
+
+  //Roles
+  public getAllRoles():any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/listRoles");
   }
 
   saveToken(jwt): void{

@@ -45,20 +45,6 @@ export class ChangePasswordComponent implements OnInit {
       
       return;
     }
-    if(this.globalService.user.statuts==='active'){
-      let ok=this.loginService.encodePassword(this.formChangePassword.value.oldPassword).subscribe((rs)=>{
-        console.log("raw pass ",rs);
-        if(rs!==this.globalService.user.password){
-          return true;
-        }else{
-          return false;
-        }
-      });
-      if(ok){
-        this.alertService.alert("L'ancien mot de passe saisi est incorrect, veuillez entrer le bon mot de passe","warning");
-        return;
-      }
-    }
 
     this.passEntry.emit(this.formChangePassword.value);
     this.activeModal.close();

@@ -1,0 +1,62 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="modal-header">
+      <h4 class="modal-title text-center" id="modal-basic-title">Création Médecin</h4>
+      <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+            <span aria-hidden="true">&times;</span>
+       </button>
+    </div>
+    <div class="modal-body">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="nom">Nom</label>
+                        <input formControlName="nom" class="form-control" type="text" placeholder="Nom">
+                        <span *ngIf="valider && f.nom.errors && f.nom.errors.required">Champs obligatoire </span>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="telephone">Téléphone</label>
+                    <input formControlName="telephone" class="form-control" type="text" 
+                        placeholder="Téléphone">
+                        <span *ngIf="valider && f.telephone.errors && f.telephone.errors.required">Champs obligatoire </span>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select #myRole required="required" class="form-control" 
+                        formControlName="role">
+                                <option *ngFor='let s of roles' value="{{s.id}}">{{s.name}}</option>
+                        </select>
+
+                        <span *ngIf="valider && f.role.errors && f.role.errors.required">Champs obligatoire </span>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input formControlName="email" class="form-control" type="text" placeholder="E-mail" required="required">
+                        <span *ngIf="valider && f.email.errors && f.email.errors.email">Email invalide </span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="adresse">Adresse</label>
+                        <textarea formControlName="adresse" class="form-control" type="text" placeholder="Adresse">
+                        </textarea>
+
+                        <span *ngIf="valider && f.adresse.errors && f.adresse.errors.required">Champs obligatoire </span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="submit" class="form-control btn btn-primary" value="Enregistrer">
+            </div>
+    </div>
+</form>

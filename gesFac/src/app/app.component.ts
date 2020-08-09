@@ -15,7 +15,9 @@ export class AppComponent implements OnInit {
   constructor(
     public sidebarservice: SidebarService,
     public globalService: GlobalService,
-    private router: Router) { }
+    private router: Router) { 
+      
+    }
   ngOnInit(): void {
     this.router.events.forEach(event => {
       if (event instanceof NavigationEnd) {
