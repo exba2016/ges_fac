@@ -1,6 +1,7 @@
 package cours.m2gl.jee.api.hospital.controller;
 
 import cours.m2gl.jee.api.hospital.config.JwtTokenUtil;
+import cours.m2gl.jee.api.hospital.dao.ProduitRepository;
 import cours.m2gl.jee.api.hospital.dao.RoleRepository;
 import cours.m2gl.jee.api.hospital.dao.UserRepository;
 import cours.m2gl.jee.api.hospital.model.*;
@@ -24,7 +25,44 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+class ProduitModel{
+    private String libelle;
+    private double qte;
+    private double prix;
+    private double prixMin;
 
+    public String getLibelle() {
+        return libelle;
+    }
+
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
+    }
+
+    public double getQte() {
+        return qte;
+    }
+
+    public void setQte(double qte) {
+        this.qte = qte;
+    }
+
+    public double getPrix() {
+        return prix;
+    }
+
+    public void setPrix(double prix) {
+        this.prix = prix;
+    }
+
+    public double getPrixMin() {
+        return prixMin;
+    }
+
+    public void setPrixMin(double prixMin) {
+        this.prixMin = prixMin;
+    }
+}
 class UserModel{
     private String nom;
     private String telephone;
@@ -85,6 +123,8 @@ public class JwtAuthenticationController {
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private ProduitRepository produitRepository;
 
 
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
@@ -133,7 +173,7 @@ public class JwtAuthenticationController {
     @PostMapping("/users")
     public @ResponseBody
     User findUser(@RequestBody String username){
-        return userRepository.findAllByUsernameOrEmail(username);
+        return userRepository.findByUsernameAndStatutsIsNotContaining(username,"supprimé");
     }
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @PutMapping("/encodePassword/{id}")
@@ -142,7 +182,7 @@ public class JwtAuthenticationController {
         return new BCryptPasswordEncoder().matches(password,userRepository.findById(id).get().getPassword());
     }
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
-    @PostMapping("/users")
+    @PostMapping("/users/add")
     public @ResponseBody
     boolean addUser(@RequestBody UserModel user){
         User u=new User();
@@ -157,6 +197,39 @@ public class JwtAuthenticationController {
         u.setUsername(u.getEmail());
         u.setRole(roleRepository.findById(user.getRole()).get());
 
+        try{
+            userRepository.save(u);
+            return true;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @PutMapping("/users/update/{id}")
+    public @ResponseBody
+    boolean updateUser(@RequestBody UserModel user,@PathVariable Long id){
+        User u=userRepository.findById(id).get();
+        u.setAdresse(user.getAdresse());
+        u.setUpdatedAt(Date.from(Instant.now()));
+        u.setEmail(user.getEmail());
+        u.setNom(user.getNom());
+        u.setTelephone(user.getTelephone());
+        u.setUsername(u.getEmail());
+        u.setRole(roleRepository.findById(user.getRole()).get());
+
+        try{
+            userRepository.save(u);
+            return true;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/users/delete")
+    public @ResponseBody
+    boolean deleteUser(@RequestParam Long id){
+        User u=userRepository.findById(id).get();
+        u.setStatuts("supprimé");
         try{
             userRepository.save(u);
             return true;
@@ -182,7 +255,82 @@ public class JwtAuthenticationController {
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @GetMapping("/users")
     List<User> getAllUser(){
-        return userRepository.findAll();
+        return userRepository.getAllByStatutsIsNotContaining("supprimé");
+    }
+
+    //Produit
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/produits")
+    List<Produit> getAllProduits(){
+        return produitRepository.getAllByStatutsIsNotContaining("supprimé");
+    }
+
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/produits/add")
+    public @ResponseBody
+    boolean addProduit(@RequestBody Produit produit){
+        Produit p=new Produit();
+        p.setCode(generateCode("produit"));
+        p.setQte(produit.getQte());
+        p.setPrixMin(produit.getPrixMin());
+        p.setLibelle(produit.getLibelle());
+        p.setPrix(produit.getPrix());
+        p.setCreatedAt(Date.from(Instant.now()));
+        p.setUpdatedAt(Date.from(Instant.now()));
+        p.setStatuts("active");
+        try{
+            produitRepository.save(p);
+            return true;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PutMapping("/produits/update/{id}")
+    public @ResponseBody
+    boolean updateProduit(@RequestBody Produit pr,@PathVariable Long id){
+        Produit p=produitRepository.findById(id).get();
+        p.setLibelle(pr.getLibelle());
+        p.setUpdatedAt(Date.from(Instant.now()));
+        p.setPrix(pr.getPrix());
+        p.setPrixMin(pr.getPrixMin());
+        p.setQte(pr.getQte());
+        try{
+            produitRepository.save(p);
+            return true;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/produits/delete")
+    public @ResponseBody
+    boolean deleteProduit(@RequestParam Long id){
+        Produit u=produitRepository.findById(id).get();
+        u.setStatuts("supprimé");
+        try{
+            produitRepository.save(u);
+            return true;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+
+    public String generateCode(String table){
+        String code="";
+        switch (table.toLowerCase()){
+            case "produit":
+                while(true){
+                    code=""+(100000 + (int)(Math.random() * ((200000 - 100000) + 1)));
+                    if(produitRepository.findByCode(code)==null){
+                        break;
+                    }
+                }
+                break;
+        }
+        return code;
     }
 
 }

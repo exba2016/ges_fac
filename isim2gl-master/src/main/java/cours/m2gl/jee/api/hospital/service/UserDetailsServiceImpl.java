@@ -29,7 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
 
-        User user = userRepository.findByUsername(s);
+        User user = userRepository.findByUsernameAndStatutsIsNotContaining(s,"supprimé");
         if(user != null)
         {
 

@@ -23,6 +23,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { UserCreateUpdateComponent } from './pages/modals/user-create-update/user-create-update.component';
 import { ProduitCreateUpdateComponent } from './pages/modals/produit-create-update/produit-create-update.component';
+import { ModalConfirmDialogComponent } from './pages/modals/modal-confirm-dialog/modal-confirm-dialog.component';
 
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
@@ -42,7 +43,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     AccueilComponent,
     ChangePasswordComponent,
     UserCreateUpdateComponent,
-    ProduitCreateUpdateComponent
+    ProduitCreateUpdateComponent,
+    ModalConfirmDialogComponent
   ],
   imports: [
     BrowserModule,

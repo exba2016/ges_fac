@@ -24,8 +24,9 @@ public class Commande {
     @Size(min=3, max = 30)
     private String code;
 
-    @NotBlank
     private String urlFactureGlobal;
+
+    private String adresseLivraison;
 
     private double totalHT;
 
@@ -168,5 +169,13 @@ public class Commande {
 
     public void setPaiements(List<Paiement> paiements) {
         this.paiements = paiements;
+    }
+
+    public String getAdresseLivraison() {
+        return adresseLivraison;
+    }
+
+    public void setAdresseLivraison(String adresseLivraison) {
+        this.adresseLivraison = adresseLivraison;
     }
 }

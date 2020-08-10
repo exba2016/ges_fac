@@ -1,1 +1,53 @@
-<p>produit-create-update works!</p>
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="modal-header">
+      <h4 class="modal-title text-center" id="modal-basic-title">Création Médecin</h4>
+      <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+            <span aria-hidden="true">&times;</span>
+       </button>
+    </div>
+    <div class="modal-body">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="libelle">Libelle</label>
+                        <input formControlName="libelle" class="form-control" type="text" placeholder="Libelle">
+                        <span *ngIf="valider && f.libelle.errors && f.libelle.errors.required">Champs obligatoire </span>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="prix">Prix</label>
+                    <input formControlName="prix" class="form-control" type="number" 
+                        placeholder="Prix">
+                        <span *ngIf="valider && f.prix.errors && f.prix.errors.required">Champs obligatoire </span>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <div class="form-group">
+                            <label for="prixMin">Prix Minimum</label>
+                        <input formControlName="prixMin" class="form-control" type="number" 
+                            placeholder="Prix Minimum">
+                            <span *ngIf="valider && f.prixMin.errors && f.prixMin.errors.required">Champs obligatoire </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <div class="form-group">
+                            <label for="qte">Quantité</label>
+                        <input formControlName="qte" class="form-control" type="number" 
+                            placeholder="Quantité">
+                            <span *ngIf="valider && f.qte.errors && f.qte.errors.required">Champs obligatoire </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="submit" class="form-control btn btn-primary" value="Enregistrer">
+            </div>
+    </div>
+</form>

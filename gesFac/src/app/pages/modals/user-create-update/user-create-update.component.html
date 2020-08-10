@@ -1,6 +1,6 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="modal-header">
-      <h4 class="modal-title text-center" id="modal-basic-title">Création Médecin</h4>
+      <h4 class="modal-title text-center" id="modal-basic-title">Création Utilisateur</h4>
       <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
             <span aria-hidden="true">&times;</span>
        </button>
@@ -39,7 +39,7 @@
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label for="email">E-mail</label>
-                        <input formControlName="email" class="form-control" type="text" placeholder="E-mail" required="required">
+                        <input [readOnly]="user" formControlName="email" class="form-control" type="text" placeholder="E-mail" required="required">
                         <span *ngIf="valider && f.email.errors && f.email.errors.email">Email invalide </span>
                     </div>
                 </div>
