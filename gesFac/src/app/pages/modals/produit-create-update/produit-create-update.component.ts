@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewEncapsulation } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { LoginService } from '../../services/login.service';
@@ -6,7 +6,8 @@ import { LoginService } from '../../services/login.service';
 @Component({
   selector: 'app-produit-create-update',
   templateUrl: './produit-create-update.component.html',
-  styleUrls: ['./produit-create-update.component.scss']
+  styleUrls: ['./produit-create-update.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class ProduitCreateUpdateComponent implements OnInit {
 

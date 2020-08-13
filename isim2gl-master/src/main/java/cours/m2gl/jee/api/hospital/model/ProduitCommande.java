@@ -1,42 +1,43 @@
 package cours.m2gl.jee.api.hospital.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity
 @Table(name = "produitCommande")
-public class ProduitCommande {
+public class ProduitCommande  implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private double prix;
     private double qte;
 
-    @Size(min=4, max = 30)
     private String statuts;
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
     private Date dateLivraison;
-
-    @JsonIgnoreProperties("produitCommande")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "produit_id")
     private Produit produit;
-    @JsonIgnoreProperties("produitCommande")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "commande_id")
     private Commande commande;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public Date getDateLivraison() {
         return dateLivraison;
     }
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public void setDateLivraison(Date dateLivraison) {
         this.dateLivraison = dateLivraison;
     }

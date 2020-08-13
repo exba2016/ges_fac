@@ -1,6 +1,6 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="modal-header">
-      <h4 class="modal-title text-center" id="modal-basic-title">Création Produit</h4>
+      <h4 class="modal-title text-center" id="modal-basic-title">Séléction d'un produit</h4>
       <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
             <span aria-hidden="true">&times;</span>
        </button>
@@ -9,15 +9,19 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="form-group">
-                        <label for="libelle">Libelle</label>
-                        <input formControlName="libelle" class="form-control" type="text" placeholder="Libelle">
-                        <span *ngIf="valider && f.libelle.errors && f.libelle.errors.required">Champs obligatoire </span>
+                        <label for="produit">Produit</label>
+                        <select #myRole required="required" class="form-control"
+                        formControlName="produit">
+                                <option *ngFor='let s of produits' value="{{s.id}}">{{s.libelle}}-qte restant :{{s.qte}}-prix normal :{{s.prix}}-prix Min :{{s.prixMin}}</option>
+                        </select>
+
+                        <span *ngIf="valider && f.produit.errors && f.produit.errors.required">Champs obligatoire </span>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label for="prix">Prix</label>
-                    <input formControlName="prix" class="form-control" type="number" 
+                    <input formControlName="prix" (blur)="verifPrix()" class="form-control" type="number" 
                         placeholder="Prix">
                         <span *ngIf="valider && f.prix.errors && f.prix.errors.required">Champs obligatoire </span>
                     </div>
@@ -28,10 +32,10 @@
                 <div class="col-sm-6">
                     <div class="form-group">
                         <div class="form-group">
-                            <label for="prixMin">Prix Minimum</label>
-                        <input formControlName="prixMin" class="form-control" type="number" 
-                            placeholder="Prix Minimum">
-                            <span *ngIf="valider && f.prixMin.errors && f.prixMin.errors.required">Champs obligatoire </span>
+                            <label for="prixMin">Date Livraison du produit</label>
+                        <input formControlName="dateLivraison" class="form-control" type="date" 
+                            placeholder="Date Livraison du produit">
+                            <span *ngIf="valider && f.dateLivraison.errors && f.dateLivraison.errors.required">Champs obligatoire </span>
                         </div>
                     </div>
                 </div>
@@ -39,7 +43,7 @@
                     <div class="form-group">
                         <div class="form-group">
                             <label for="qte">Quantité</label>
-                        <input formControlName="qte" class="form-control" type="number" 
+                        <input formControlName="qte" (blur)="verifQte()" class="form-control" type="number" 
                             placeholder="Quantité">
                             <span *ngIf="valider && f.qte.errors && f.qte.errors.required">Champs obligatoire </span>
                         </div>

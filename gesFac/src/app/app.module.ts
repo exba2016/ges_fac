@@ -24,6 +24,8 @@ import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { UserCreateUpdateComponent } from './pages/modals/user-create-update/user-create-update.component';
 import { ProduitCreateUpdateComponent } from './pages/modals/produit-create-update/produit-create-update.component';
 import { ModalConfirmDialogComponent } from './pages/modals/modal-confirm-dialog/modal-confirm-dialog.component';
+import { CommandeCreateUpdateComponent } from './pages/modals/commande-create-update/commande-create-update.component';
+import { SelectProduitCommandeComponent } from './pages/modals/select-produit-commande/select-produit-commande.component';
 
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
@@ -44,7 +46,9 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     ChangePasswordComponent,
     UserCreateUpdateComponent,
     ProduitCreateUpdateComponent,
-    ModalConfirmDialogComponent
+    ModalConfirmDialogComponent,
+    CommandeCreateUpdateComponent,
+    SelectProduitCommandeComponent
   ],
   imports: [
     BrowserModule,

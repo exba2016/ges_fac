@@ -1,11 +1,13 @@
 package cours.m2gl.jee.api.hospital.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -15,13 +17,12 @@ import java.util.List;
                 "code"
         })
 })
-public class Commande {
+public class Commande implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    @Size(min=3, max = 30)
     private String code;
 
     private String urlFactureGlobal;
@@ -31,13 +32,10 @@ public class Commande {
     private double totalHT;
 
     private double totalTTC;
-
     private Date dateLivraison;
 
     private boolean isPayed;
 
-
-    @Size(min=4, max = 30)
     private String statuts;
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -45,18 +43,15 @@ public class Commande {
     private Date updatedAt;
 
     private boolean isValide;
-
-    @JsonIgnoreProperties("commande")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
-
-    @JsonIgnoreProperties("commande")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @OneToMany(mappedBy = "commande")
     private List<ProduitCommande>produitCommandes;
-
-    @JsonIgnoreProperties("commande")
-    @OneToMany(mappedBy = "commande")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @OneToMany(mappedBy = "commande",cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Paiement>paiements;
 
     public boolean isValide() {
@@ -107,10 +102,11 @@ public class Commande {
         this.totalTTC = totalTTC;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public Date getDateLivraison() {
         return dateLivraison;
     }
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public void setDateLivraison(Date dateLivraison) {
         this.dateLivraison = dateLivraison;
     }
@@ -154,7 +150,7 @@ public class Commande {
     public void setUser(User user) {
         this.user = user;
     }
-
+    @JsonIgnore
     public List<ProduitCommande> getProduitCommandes() {
         return produitCommandes;
     }

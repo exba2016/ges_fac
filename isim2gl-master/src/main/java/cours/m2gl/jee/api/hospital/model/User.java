@@ -1,5 +1,7 @@
 package cours.m2gl.jee.api.hospital.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.NaturalId;
 
@@ -7,6 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -19,36 +22,29 @@ import java.util.List;
                 "email"
         })
 })
-public class User{
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    @Size(min=3, max = 50)
     private String username;
 
     @NaturalId
     @NotBlank
-    @Size(max = 50)
     @Email
     private String email;
 
     @NotBlank
-    @Size(min=6, max = 100)
     private String password;
 
     @NotBlank
-    @Size(min=3, max = 50)
     private String nom;
     @NotBlank
-    @Size(min=3, max = 50)
     private String telephone;
     @NotBlank
-    @Size(min=3, max = 50)
     private String adresse;
 
-    @Size(min=4, max = 30)
     private String statuts;
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -61,7 +57,7 @@ public class User{
     @JoinColumn(name = "role_id")
     private Role role;
 
-    @JsonIgnoreProperties("user")
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Commande> commandes;
 

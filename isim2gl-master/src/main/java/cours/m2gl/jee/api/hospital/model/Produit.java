@@ -1,11 +1,13 @@
 package cours.m2gl.jee.api.hospital.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -15,16 +17,14 @@ import java.util.List;
                 "code"
         })
 })
-public class Produit {
+public class Produit implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    @Size(min=3, max = 30)
     private String code;
     @NotBlank
-    @Size(min=6, max = 50)
     private String libelle;
 
     private double prix;
@@ -33,15 +33,14 @@ public class Produit {
 
     private double qte;
 
-    @Size(min=4, max = 30)
     private String statuts;
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
-    @JsonIgnoreProperties("produit")
-    @OneToMany(mappedBy = "produit")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @OneToMany(mappedBy = "produit",cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<ProduitCommande>produitCommandes;
 
     public Long getId() {
@@ -115,7 +114,7 @@ public class Produit {
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
-
+    @JsonIgnore
     public List<ProduitCommande> getProduitCommandes() {
         return produitCommandes;
     }

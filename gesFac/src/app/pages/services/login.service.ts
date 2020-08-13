@@ -28,6 +28,9 @@ export class LoginService {
   public getAllUser():any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/users");
   }
+  public getAllClient():any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/users/client");
+  }
   public addUser(user:any):any{
     return this.http.post<any>(this.apiConfig.REST_API_SERVER+"/users/add",user);
   }
@@ -53,7 +56,26 @@ export class LoginService {
     return this.http.put<any>(this.apiConfig.REST_API_SERVER+"/produits/update/"+id,produit);
   }
   public deleteProduit(id:number):any{
-    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/produit/delete?id="+id);
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/produits/delete?id="+id);
+  }
+  //Commande
+  public getAllCommande():any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes");
+  }
+  public getAllCommandeByDate(dd:any,df:any):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes/date?dd="+dd+"&df="+df);
+  }
+  public addCommande(produit:any):any{
+    return this.http.post<any>(this.apiConfig.REST_API_SERVER+"/commandes/add",produit);
+  }
+  public updateCommande(produit:any,id:number):any{
+    return this.http.put<any>(this.apiConfig.REST_API_SERVER+"/commandes/update/"+id,produit);
+  }
+  public getAllProduitCommandeByCommande(id:number):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes/produit?id="+id);
+  }
+  public deleteCommande(id:number):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes/delete?id="+id);
   }
 
 

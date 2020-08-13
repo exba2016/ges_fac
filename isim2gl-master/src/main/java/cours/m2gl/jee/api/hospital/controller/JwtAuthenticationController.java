@@ -1,9 +1,8 @@
 package cours.m2gl.jee.api.hospital.controller;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import cours.m2gl.jee.api.hospital.config.JwtTokenUtil;
-import cours.m2gl.jee.api.hospital.dao.ProduitRepository;
-import cours.m2gl.jee.api.hospital.dao.RoleRepository;
-import cours.m2gl.jee.api.hospital.dao.UserRepository;
+import cours.m2gl.jee.api.hospital.dao.*;
 import cours.m2gl.jee.api.hospital.model.*;
 import cours.m2gl.jee.api.hospital.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,46 +20,150 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 import java.time.Instant;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
-class ProduitModel{
-    private String libelle;
-    private double qte;
-    private double prix;
-    private double prixMin;
+class CommandeModel implements Serializable {
+    private Long id;
+    private String code;
+    private String urlFactureGlobal;
+    private String adresseLivraison;
+    private double totalHT;
+    private double totalTTC;
+    private Date dateLivraison;
+    private boolean isPayed;
+    private String statuts;
+    private Date createdAt;
+    private Date updatedAt;
+    private boolean isValide;
+    private User user;
+    private List<ProduitCommande>produitCommandes;
+    private List<Paiement>paiements;
 
-    public String getLibelle() {
-        return libelle;
+    public Long getId() {
+        return id;
     }
 
-    public void setLibelle(String libelle) {
-        this.libelle = libelle;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public double getQte() {
-        return qte;
+    public String getCode() {
+        return code;
     }
 
-    public void setQte(double qte) {
-        this.qte = qte;
+    public void setCode(String code) {
+        this.code = code;
     }
 
-    public double getPrix() {
-        return prix;
+    public String getUrlFactureGlobal() {
+        return urlFactureGlobal;
     }
 
-    public void setPrix(double prix) {
-        this.prix = prix;
+    public void setUrlFactureGlobal(String urlFactureGlobal) {
+        this.urlFactureGlobal = urlFactureGlobal;
     }
 
-    public double getPrixMin() {
-        return prixMin;
+    public String getAdresseLivraison() {
+        return adresseLivraison;
     }
 
-    public void setPrixMin(double prixMin) {
-        this.prixMin = prixMin;
+    public void setAdresseLivraison(String adresseLivraison) {
+        this.adresseLivraison = adresseLivraison;
+    }
+
+    public double getTotalHT() {
+        return totalHT;
+    }
+
+    public void setTotalHT(double totalHT) {
+        this.totalHT = totalHT;
+    }
+
+    public double getTotalTTC() {
+        return totalTTC;
+    }
+
+    public void setTotalTTC(double totalTTC) {
+        this.totalTTC = totalTTC;
+    }
+
+    public Date getDateLivraison() {
+        return dateLivraison;
+    }
+
+    public void setDateLivraison(Date dateLivraison) {
+        this.dateLivraison = dateLivraison;
+    }
+
+    public boolean isPayed() {
+        return isPayed;
+    }
+
+    public void setPayed(boolean payed) {
+        isPayed = payed;
+    }
+
+    public String getStatuts() {
+        return statuts;
+    }
+
+    public void setStatuts(String statuts) {
+        this.statuts = statuts;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public boolean isValide() {
+        return isValide;
+    }
+
+    public void setValide(boolean valide) {
+        isValide = valide;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public List<ProduitCommande> getProduitCommandes() {
+        return produitCommandes;
+    }
+
+    public void setProduitCommandes(List<ProduitCommande> produitCommandes) {
+        this.produitCommandes = produitCommandes;
+    }
+
+    public List<Paiement> getPaiements() {
+        return paiements;
+    }
+
+    public void setPaiements(List<Paiement> paiements) {
+        this.paiements = paiements;
     }
 }
 class UserModel{
@@ -125,6 +228,10 @@ public class JwtAuthenticationController {
     private RoleRepository roleRepository;
     @Autowired
     private ProduitRepository produitRepository;
+    @Autowired
+    private CommandeRepository commandeRepository;
+    @Autowired
+    private ProduitCommandeRepository produitCommandeRepository;
 
 
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
@@ -174,6 +281,13 @@ public class JwtAuthenticationController {
     public @ResponseBody
     User findUser(@RequestBody String username){
         return userRepository.findByUsernameAndStatutsIsNotContaining(username,"supprimé");
+    }
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/users/client")
+    public @ResponseBody
+    List<User> findUserClient(){
+
+        return userRepository.getAllClientNotHaveActiveCommande("supprimé",RoleName.ROLE_CLIENT);
     }
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @PutMapping("/encodePassword/{id}")
@@ -318,13 +432,197 @@ public class JwtAuthenticationController {
         }
     }
 
+    //Commande
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/commandes")
+    List<Commande> getAllCommandes(){
+        return commandeRepository.getAllByStatutsIsNotContaining("supprimé");
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/commandes/date")
+    List<Commande> getAllCommandesByDate(@RequestParam("dd") String dd,@RequestParam("df") String df)
+    {
+
+        if((dd != null && !dd.isEmpty() && !dd.trim().isEmpty() && !dd.equals("undefined")) && (df != null && !df.isEmpty() && !df.trim().isEmpty() && !df.equals("undefined"))){
+            Date date_d= Date.from(LocalDate.parse(dd).atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date date_f= Date.from(LocalDate.parse(df).atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+            return commandeRepository.getAllByStatutsIsNotContainingAndCreatedAtIsGreaterThanEqualAndCreatedAtIsLessThanEqual("supprimé",date_d,date_f);
+        }else if(dd != null && !dd.isEmpty() && !dd.trim().isEmpty() && !dd.equals("undefined")){
+            Date date_d= Date.from(LocalDate.parse(dd).atStartOfDay(ZoneId.systemDefault()).toInstant());
+            return commandeRepository.getAllByStatutsIsNotContainingAndCreatedAtIsGreaterThanEqual("supprimé",date_d);
+        }else if(df != null && !df.isEmpty() && !df.trim().isEmpty() && !df.equals("undefined")){
+            Date date_f= Date.from(LocalDate.parse(df).atStartOfDay(ZoneId.systemDefault()).toInstant());
+            return commandeRepository.getAllByStatutsIsNotContainingAndCreatedAtIsLessThanEqual("supprimé",date_f);
+        }
+        System.out.println("allNull");
+        return new ArrayList<Commande>();
+    }
+
+
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/commandes/add")
+    public @ResponseBody
+    Commande addCommande(@RequestBody CommandeModel commande){
+        Commande p=new Commande();
+        Map<String,Double>totalHtTtc=getTotalHTAndTTC(commande.getProduitCommandes());
+        p.setCode(generateCode("commande"));
+        p.setAdresseLivraison(commande.getAdresseLivraison());
+        p.setDateLivraison(commande.getDateLivraison());
+
+        p.setPayed(false);
+        p.setTotalHT(totalHtTtc.get("totalHT"));
+        p.setTotalTTC(totalHtTtc.get("totalTTC"));
+        p.setValide(false);
+        p.setUser(commande.getUser());
+        p.setCreatedAt(Date.from(Instant.now()));
+        p.setUpdatedAt(Date.from(Instant.now()));
+        p.setStatuts("active");
+
+        try{
+            commandeRepository.save(p);
+
+            List<ProduitCommande>lp=new ArrayList<>();
+            for(ProduitCommande pc:commande.getProduitCommandes()){
+                ProduitCommande c=new ProduitCommande();
+                c.setCommande(p);
+                c.setProduit(pc.getProduit());
+                c.setCreatedAt(Date.from(Instant.now()));
+                c.setUpdatedAt(Date.from(Instant.now()));
+                c.setDateLivraison(pc.getDateLivraison());
+                c.setProduit(pc.getProduit());
+                c.setQte(pc.getQte());
+                c.setPrix(pc.getPrix());
+                c.setStatuts("active");
+                produitCommandeRepository.save(c);
+                Produit pr=produitRepository.findById(pc.getProduit().getId()).get();
+                pr.setQte(pr.getQte()-pc.getQte());
+                pr.setUpdatedAt(Date.from(Instant.now()));
+                produitRepository.save(pr);
+
+            }
+            return p;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return new Commande();
+        }
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @PutMapping("/commandes/update/{id}")
+    public @ResponseBody
+    boolean updateCommande(@RequestBody CommandeModel commande,@PathVariable Long id){
+        Commande p=commandeRepository.findById(id).get();
+        Map<String,Double>totalHtTtc=getTotalHTAndTTC(commande.getProduitCommandes());
+        p.setAdresseLivraison(commande.getAdresseLivraison());
+        p.setDateLivraison(commande.getDateLivraison());
+        p.setTotalHT(totalHtTtc.get("totalHT"));
+        p.setTotalTTC(totalHtTtc.get("totalTTC"));
+        p.setUser(commande.getUser());
+        p.setUpdatedAt(Date.from(Instant.now()));
+        try{
+            commandeRepository.save(p);
+            for(ProduitCommande pc:commande.getProduitCommandes()){
+                System.out.println("testPc "+pc.getId()+" "+pc.getStatuts());
+                if(pc.getId()==null ||pc.getId()==0){
+                    ProduitCommande c=new ProduitCommande();
+                    c.setCommande(p);
+                    c.setProduit(pc.getProduit());
+                    c.setCreatedAt(Date.from(Instant.now()));
+                    c.setUpdatedAt(Date.from(Instant.now()));
+                    c.setDateLivraison(pc.getDateLivraison());
+                    c.setProduit(pc.getProduit());
+                    c.setQte(pc.getQte());
+                    c.setPrix(pc.getPrix());
+                    c.setStatuts("active");
+                    produitCommandeRepository.save(c);
+
+                    Produit pr=produitRepository.findById(pc.getProduit().getId()).get();
+                    pr.setQte(pr.getQte()-pc.getQte());
+                    pr.setUpdatedAt(Date.from(Instant.now()));
+                    produitRepository.save(pr);
+                }else {
+                    ProduitCommande oldPc = new ProduitCommande();
+                    oldPc = produitCommandeRepository.findById(pc.getId()).get();
+
+                    if (pc.getStatuts() != null && !pc.getStatuts().isEmpty() && pc.getStatuts() == "supprimé") {
+                        pc.setUpdatedAt(Date.from(Instant.now()));
+                        Produit pr = produitRepository.findById(pc.getProduit().getId()).get();
+                        pr.setQte(pr.getQte() + oldPc.getQte());
+                        pr.setUpdatedAt(Date.from(Instant.now()));
+                        produitRepository.save(pr);
+                        produitCommandeRepository.save(pc);
+                    }
+                    if (oldPc.getQte() > pc.getQte()) {
+                        pc.setUpdatedAt(Date.from(Instant.now()));
+                        Produit pr = produitRepository.findById(pc.getProduit().getId()).get();
+                        pr.setQte(pr.getQte() + (oldPc.getQte() - pc.getQte()));
+                        pr.setUpdatedAt(Date.from(Instant.now()));
+                        produitRepository.save(pr);
+                        produitCommandeRepository.save(pc);
+                    } else if (oldPc.getQte() < pc.getQte()) {
+                        pc.setUpdatedAt(Date.from(Instant.now()));
+                        Produit pr = produitRepository.findById(pc.getProduit().getId()).get();
+                        pr.setQte(pr.getQte() - (pc.getQte() - oldPc.getQte()));
+                        pr.setUpdatedAt(Date.from(Instant.now()));
+                        produitRepository.save(pr);
+                        produitCommandeRepository.save(pc);
+                    }
+                }
+
+            }
+            return true;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/commandes/delete")
+    public @ResponseBody
+    boolean deleteCommande(@RequestParam Long id){
+        Commande u=commandeRepository.findById(id).get();
+        u.setStatuts("supprimé");
+        try{
+            commandeRepository.save(u);
+            return true;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/commandes/produit")
+    public @ResponseBody
+    List<ProduitCommande> getAllProduitByCommande(@RequestParam Long id){
+        return produitCommandeRepository.getAllByStatutsIsNotContainingAndCommandeId("supprimé",id);
+    }
+
+    public Map<String,Double> getTotalHTAndTTC(List<ProduitCommande>lp){
+        Map<String,Double>totalHtTtc=new HashMap<>();
+        double total=0,tva=0;
+        for(ProduitCommande pc:lp){
+            total+=pc.getPrix()*pc.getQte();
+        }
+        tva=total*0.18;
+        totalHtTtc.put("totalHT",total);
+        totalHtTtc.put("totalTTC",(total+tva));
+        return totalHtTtc;
+    }
+
     public String generateCode(String table){
         String code="";
         switch (table.toLowerCase()){
             case "produit":
                 while(true){
-                    code=""+(100000 + (int)(Math.random() * ((200000 - 100000) + 1)));
+                    code=""+(10000000 + (int)(Math.random() * ((20000000 - 10000000) + 1)));
                     if(produitRepository.findByCode(code)==null){
+                        break;
+                    }
+                }
+                break;
+            case "commande":
+                while(true){
+                    code=""+(10000000 + (int)(Math.random() * ((20000000 - 10000000) + 1)));
+                    if(commandeRepository.findByCode(code)==null){
                         break;
                     }
                 }

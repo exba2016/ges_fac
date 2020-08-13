@@ -1,11 +1,13 @@
 package cours.m2gl.jee.api.hospital.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity
@@ -14,19 +16,17 @@ import java.util.Date;
                 "code"
         })
 })
-public class Paiement {
+public class Paiement implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    @Size(min=3, max = 30)
     private String code;
 
     private double montantPaye;
     private String urlFacturePartielle;
 
-    @Size(min=4, max = 30)
     private String statuts;
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -78,6 +78,7 @@ public class Paiement {
         this.statuts = statuts;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     public Date getCreatedAt() {
         return createdAt;
     }
