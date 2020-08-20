@@ -1,0 +1,65 @@
+<div class="modal-header">
+  <h4 class="modal-title text-center" id="modal-basic-title">Facture</h4>
+  <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="container mt-5"  >
+    <div class="d-flex justify-content-center row">
+      <div class="col-md-8" id="htmlData" #htmlData>
+        <div class="p-3 bg-white rounded">
+          <div class="row">
+            <div class="col-md-6">
+              <h1 class="text-uppercase">Facture</h1>
+              <div class="billed"><span class="font-weight-bold text-uppercase">Client:</span><span class="ml-1"></span></div>
+              <div class="billed"><span class="font-weight-bold text-uppercase">Date:</span><span class="ml-1">{{commande.createdAt}}</span></div>
+              <div class="billed"><span class="font-weight-bold text-uppercase">Commande ID:</span><span class="ml-1">#{{commande.code}}</span></div>
+            </div>
+            <div class="col-md-6 text-right mt-3">
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="table-responsive">
+              <table id="table" #table class="table">
+                <thead>
+                <tr>
+                  <th>Produit</th>
+                  <th>Quantité</th>
+                  <th>Prix</th>
+                  <th>TVA</th>
+                  <th>Montant TTC</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let p of produitCommande">
+                  <td>{{p.produit.libelle}}</td>
+                  <td>{{p.qte}}</td>
+                  <td>{{p.prix}}</td>
+                  <td>{{((p.qte*p.prix)*0.18)}}</td>
+                  <td>{{((p.qte*p.prix)*0.18)+(p.qte*p.prix)}}</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>Total HT</td>
+                  <td>{{commande.totalHT}}</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>Total TTC</td>
+                  <td>{{commande.totalTTC}}</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

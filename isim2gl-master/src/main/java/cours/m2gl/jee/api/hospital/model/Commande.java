@@ -32,14 +32,17 @@ public class Commande implements Serializable {
     private double totalHT;
 
     private double totalTTC;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date dateLivraison;
 
     private boolean isPayed;
 
     private String statuts;
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date createdAt;
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date updatedAt;
 
     private boolean isValide;
@@ -50,7 +53,7 @@ public class Commande implements Serializable {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @OneToMany(mappedBy = "commande")
     private List<ProduitCommande>produitCommandes;
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnore
     @OneToMany(mappedBy = "commande",cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Paiement>paiements;
 
@@ -102,11 +105,10 @@ public class Commande implements Serializable {
         this.totalTTC = totalTTC;
     }
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+
     public Date getDateLivraison() {
         return dateLivraison;
     }
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public void setDateLivraison(Date dateLivraison) {
         this.dateLivraison = dateLivraison;
     }

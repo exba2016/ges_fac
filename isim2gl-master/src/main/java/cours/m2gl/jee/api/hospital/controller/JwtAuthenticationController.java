@@ -232,6 +232,8 @@ public class JwtAuthenticationController {
     private CommandeRepository commandeRepository;
     @Autowired
     private ProduitCommandeRepository produitCommandeRepository;
+    @Autowired
+    private PaiementRepository paiementRepository;
 
 
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
@@ -372,6 +374,12 @@ public class JwtAuthenticationController {
         return userRepository.getAllByStatutsIsNotContaining("supprimé");
     }
 
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/users/ClientWithCommande")
+    List<User> getAllClientWithCommande(){
+        return userRepository.getAllClientWhoHaveActiveCommande("supprimé",RoleName.ROLE_CLIENT);
+    }
+
     //Produit
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/produits")
@@ -491,6 +499,7 @@ public class JwtAuthenticationController {
                 c.setCreatedAt(Date.from(Instant.now()));
                 c.setUpdatedAt(Date.from(Instant.now()));
                 c.setDateLivraison(pc.getDateLivraison());
+                p.setUrlFactureGlobal(commande.getUrlFactureGlobal());
                 c.setProduit(pc.getProduit());
                 c.setQte(pc.getQte());
                 c.setPrix(pc.getPrix());
@@ -502,6 +511,7 @@ public class JwtAuthenticationController {
                 produitRepository.save(pr);
 
             }
+            verifPaiementComplet(p.getId());
             return p;
         }catch (Exception ex){
             ex.printStackTrace();
@@ -518,6 +528,7 @@ public class JwtAuthenticationController {
         p.setDateLivraison(commande.getDateLivraison());
         p.setTotalHT(totalHtTtc.get("totalHT"));
         p.setTotalTTC(totalHtTtc.get("totalTTC"));
+        p.setUrlFactureGlobal(commande.getUrlFactureGlobal());
         p.setUser(commande.getUser());
         p.setUpdatedAt(Date.from(Instant.now()));
         try{
@@ -571,8 +582,10 @@ public class JwtAuthenticationController {
                 }
 
             }
+            verifPaiementComplet(id);
             return true;
         }catch (Exception ex){
+            ex.printStackTrace();
             return false;
         }
     }
@@ -588,6 +601,12 @@ public class JwtAuthenticationController {
         }catch (Exception ex){
             return false;
         }
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/commandes/{id}")
+    public @ResponseBody
+    Commande getCommande(@PathVariable Long id){
+        return commandeRepository.findById(id).get();
     }
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @GetMapping("/commandes/produit")
@@ -608,6 +627,92 @@ public class JwtAuthenticationController {
         return totalHtTtc;
     }
 
+    //Produit
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/paiements")
+    List<Paiement> getAllPaiement(){
+        return paiementRepository.getAllByStatutsIsNotContaining("supprimé");
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/paiements/{id}")
+    List<Paiement> getAllPaiement(@PathVariable Long id){
+        return paiementRepository.getAllPaiementByClient("supprimé",id);
+    }
+
+
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/paiements/add")
+    public @ResponseBody
+    boolean addPaiement(@RequestBody Paiement paiement){
+        Paiement p=new Paiement();
+        p.setCode(generateCode("paiement"));
+        p.setCommande(paiement.getCommande());
+        p.setMontantPaye(paiement.getMontantPaye());
+        p.setUrlFacturePartielle(paiement.getUrlFacturePartielle());
+        p.setStatuts("active");
+        p.setCreatedAt(Date.from(Instant.now()));
+        p.setUpdatedAt(Date.from(Instant.now()));
+        p.setStatuts("active");
+        try{
+            paiementRepository.save(p);
+            verifPaiementComplet(paiement.getCommande().getId());
+            return true;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @PutMapping("/paiements/update/{id}")
+    public @ResponseBody
+    boolean updatePaiement(@RequestBody Paiement pr,@PathVariable Long id){
+        Paiement p=paiementRepository.findById(id).get();
+        p.setMontantPaye(pr.getMontantPaye());
+        p.setUpdatedAt(Date.from(Instant.now()));
+        p.setUrlFacturePartielle(pr.getUrlFacturePartielle());
+        try{
+            paiementRepository.save(p);
+            verifPaiementComplet(p.getCommande().getId());
+            return true;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/paiements/delete")
+    public @ResponseBody
+    boolean deletePaiement(@RequestParam Long id){
+        Paiement u=paiementRepository.findById(id).get();
+        u.setStatuts("supprimé");
+        try{
+            paiementRepository.save(u);
+            verifPaiementComplet(id);
+            return true;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/paiements/somme/{id}")
+    public @ResponseBody
+    double getSommePaiementForCommande(@PathVariable Long id){
+        return paiementRepository.getSommePaiementForCommande("supprimé",id);
+    }
+    public void verifPaiementComplet(Long id){
+        double total=paiementRepository.getSommePaiementForCommande("supprimé",id);
+        Commande c=commandeRepository.findById(id).get();
+
+        if(c.getTotalTTC()==total && !c.isPayed()){
+            c.setPayed(true);
+            commandeRepository.save(c);
+        }else{
+            c.setPayed(false);
+            commandeRepository.save(c);
+        }
+    }
+
     public String generateCode(String table){
         String code="";
         switch (table.toLowerCase()){
@@ -623,6 +728,14 @@ public class JwtAuthenticationController {
                 while(true){
                     code=""+(10000000 + (int)(Math.random() * ((20000000 - 10000000) + 1)));
                     if(commandeRepository.findByCode(code)==null){
+                        break;
+                    }
+                }
+                break;
+            case "paiement":
+                while(true){
+                    code=""+(10000000 + (int)(Math.random() * ((20000000 - 10000000) + 1)));
+                    if(paiementRepository.findByCode(code)==null){
                         break;
                     }
                 }

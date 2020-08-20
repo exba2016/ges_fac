@@ -1,4 +1,4 @@
-<div class="btn-group margin" role="group" aria-label="Basic example">
+<div class="btn-group margin" role="group" aria-label="Basic example" *ngIf="user && user.role.name==='ROLE_ADMIN'">
     <button type="button" class="btn btn-primary btn-lg" (click)="create()">
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-plus" fill="currentColor"
             xmlns="http://www.w3.org/2000/svg">
@@ -79,12 +79,12 @@
                 {{ row.adresseLivraison }}
             </ng-template>
         </ngx-datatable-column>
-        
+
 
         <ngx-datatable-column name="Payé ?" prop="isPayed">
             <ng-template let-row="row" ngx-datatable-cell-template>
-                <span *ngIf="row.isPayed">Oui</span>
-                <span *ngIf="!row.isPayed">Non</span>
+                <span *ngIf="row.payed">Oui</span>
+                <span *ngIf="!row.payed">Non</span>
             </ng-template>
         </ngx-datatable-column>
 

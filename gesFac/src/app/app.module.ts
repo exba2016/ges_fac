@@ -26,6 +26,8 @@ import { ProduitCreateUpdateComponent } from './pages/modals/produit-create-upda
 import { ModalConfirmDialogComponent } from './pages/modals/modal-confirm-dialog/modal-confirm-dialog.component';
 import { CommandeCreateUpdateComponent } from './pages/modals/commande-create-update/commande-create-update.component';
 import { SelectProduitCommandeComponent } from './pages/modals/select-produit-commande/select-produit-commande.component';
+import { PaiementCreateUpdateComponent } from './pages/modals/paiement-create-update/paiement-create-update.component';
+import { FactureCreateUpdateComponent } from './pages/modals/facture-create-update/facture-create-update.component';
 
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
@@ -48,7 +50,9 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     ProduitCreateUpdateComponent,
     ModalConfirmDialogComponent,
     CommandeCreateUpdateComponent,
-    SelectProduitCommandeComponent
+    SelectProduitCommandeComponent,
+    PaiementCreateUpdateComponent,
+    FactureCreateUpdateComponent
   ],
   imports: [
     BrowserModule,

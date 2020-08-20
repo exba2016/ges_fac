@@ -31,6 +31,9 @@ export class LoginService {
   public getAllClient():any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/users/client");
   }
+  public getAllClientWithActiveCommande():any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/users/ClientWithCommande");
+  }
   public addUser(user:any):any{
     return this.http.post<any>(this.apiConfig.REST_API_SERVER+"/users/add",user);
   }
@@ -59,6 +62,7 @@ export class LoginService {
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/produits/delete?id="+id);
   }
   //Commande
+
   public getAllCommande():any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes");
   }
@@ -76,6 +80,28 @@ export class LoginService {
   }
   public deleteCommande(id:number):any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes/delete?id="+id);
+  }
+  public getCommande(id:number):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes/"+id);
+  }
+  //Produit
+  public getAllPaiement():any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/paiements");
+  }
+  public getAllPaiementOfClient(id:number):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/paiements/"+id);
+  }
+  public getSommePaiementOfCommande(id:number):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/paiements/somme/"+id);
+  }
+  public addPaiement(paiement:any):any{
+    return this.http.post<any>(this.apiConfig.REST_API_SERVER+"/paiements/add",paiement);
+  }
+  public updatePaiement(paiement:any,id:number):any{
+    return this.http.put<any>(this.apiConfig.REST_API_SERVER+"/paiements/update/"+id,paiement);
+  }
+  public deletePaiement(id:number):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/paiements/delete?id="+id);
   }
 
 

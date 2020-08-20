@@ -5,6 +5,7 @@ import { AlertService } from '../../services/alert.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LoginService } from '../../services/login.service';
 import { ModalConfirmDialogComponent } from '../../modals/modal-confirm-dialog/modal-confirm-dialog.component';
+import {FactureCreateUpdateComponent} from '../../modals/facture-create-update/facture-create-update.component';
 
 @Component({
   selector: 'app-gerer-commande',
@@ -27,6 +28,7 @@ export class GererCommandeComponent{
   public df: null;
   public selected = [];
   public expanded: false;
+  user;
 
   constructor(
 
@@ -34,6 +36,7 @@ export class GererCommandeComponent{
     private modalService: NgbModal,
     public loginService: LoginService
   ) {
+
     this.getData();
   }
 
@@ -46,7 +49,7 @@ export class GererCommandeComponent{
         id:receivedData.commande.user
       };
       let lpc=[];
-      
+
       lpc=receivedData.listProduitCommande;
       for(let pc of receivedData.listDelete){
         pc.statuts="supprimé";
@@ -71,8 +74,28 @@ export class GererCommandeComponent{
         console.error(er);
 
       });
-      
+
     });
+  }
+  getFacture(id){
+    const modalRef = this.modalService.open(FactureCreateUpdateComponent,{ size: 'lg' });
+    let produitCommande;
+    let commande;
+    this.loginService.getAllProduitCommandeByCommande(id).subscribe((rs)=>{
+     produitCommande=rs;
+      this.loginService.getCommande(id).subscribe((rss)=>{
+        commande=rss;
+        modalRef.componentInstance.commande=commande;
+        modalRef.componentInstance.produitCommande=produitCommande;
+        modalRef.componentInstance.passEntry.subscribe((receivedData) => {
+          console.log("after change select produit valide ", receivedData);
+
+        });
+      });
+
+    });
+
+
   }
 
   update(row = null) {
@@ -85,7 +108,7 @@ export class GererCommandeComponent{
         id:receivedData.commande.user
       };
       let lpc=[];
-      
+
       lpc=receivedData.listProduitCommande;
       for(let pc of receivedData.listDelete){
         pc.statuts="supprimé";
@@ -105,6 +128,8 @@ export class GererCommandeComponent{
         } else {
           this.alertService.alert("Echec de la modification !", "warning");
         }
+        this.getFacture(row.id);
+
       }, e => {
         console.error(e);
 
@@ -137,6 +162,10 @@ export class GererCommandeComponent{
 
   }
   getData() {
+    let user:any = localStorage.getItem('user');
+    user = JSON.parse(user);
+    console.log("retrive force user ", user);
+    this.user=user;
     this.loginService.getAllCommande().subscribe((res) => {
       console.log(res);
       this.rows = res;
@@ -152,14 +181,14 @@ export class GererCommandeComponent{
         this.temp = this.rows;
       },err=>{
         console.error(err);
-        
+
       });
     }else{
       this.getData();
-      
+
     }
-    
-    
+
+
   }
 
   updateFilter(event) {

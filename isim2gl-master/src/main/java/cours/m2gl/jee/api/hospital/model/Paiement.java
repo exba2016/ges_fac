@@ -28,8 +28,10 @@ public class Paiement implements Serializable {
     private String urlFacturePartielle;
 
     private String statuts;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 

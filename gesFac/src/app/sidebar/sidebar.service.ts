@@ -45,7 +45,7 @@ export class SidebarService {
         {
           title: 'Produits',
           url: '/produit',
-          auth: this.authList[1]
+          auth: this.authList[0]
         },
         {
           title: 'Commande',

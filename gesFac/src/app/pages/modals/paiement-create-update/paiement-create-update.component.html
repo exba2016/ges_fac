@@ -1,0 +1,41 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="modal-header">
+    <h4 class="modal-title text-center" id="modal-basic-title">Création Produit</h4>
+    <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="form-group">
+
+          <label for="montantPaye"><label *ngIf="commande || user"> Montant Restant à payé : {{montantRestant}} FCFA</label>Montant Payé</label>
+          <input formControlName="montantPaye" (blur)="verifPrix()" class="form-control" type="number" placeholder="Montant Payé">
+          <span *ngIf="valider && f.montantPaye.errors && f.montantPaye.errors.required">Champs obligatoire </span>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="form-group" *ngIf="!user">
+          <label for="commande" *ngIf="!user">Commande</label>
+          <select #myRole [hidden]="user" [(ngModel)]="commande" (ngModelChange)="calculeMontant()" required="required" class="form-control" formControlName="commande">
+            <option *ngFor='let s of commandes' value="{{s.id}}">{{s.code}} {{s.totalTTC}} FCFA-{{s.user.nom}}{{s.user.tel}}-{{s.user.email}}</option>
+          </select>
+          <span *ngIf="valider && f.commande.errors && f.commande.errors.required">Champs obligatoire </span>
+        </div>
+        <div class="form-group" *ngIf="user">
+          <label for="commande" *ngIf="!user">Commande</label>
+          <select #myRole [hidden]="user" required="required" class="form-control" formControlName="commande">
+            <option *ngFor='let s of commandes' value="{{s.id}}">#{{s.code}} {{s.totalTTC}} FCFA-{{s.user.nom}}{{s.user.tel}}-{{s.user.email}}</option>
+          </select>
+          <span *ngIf="valider && f.commande.errors && f.commande.errors.required">Champs obligatoire </span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="form-group">
+      <input type="submit" class="form-control btn btn-primary" value="Enregistrer">
+    </div>
+  </div>
+</form>
