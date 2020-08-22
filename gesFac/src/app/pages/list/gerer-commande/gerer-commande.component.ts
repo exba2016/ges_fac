@@ -66,6 +66,7 @@ export class GererCommandeComponent{
         if (rss) {
           console.log("After create commande ",rss);
           this.alertService.alert("Ajout éffectué avec succes !", "success");
+          this.getFacture(rss.id);
           this.getData();
         } else {
           this.alertService.alert("Echec de l'ajout !", "warning");
@@ -85,11 +86,24 @@ export class GererCommandeComponent{
      produitCommande=rs;
       this.loginService.getCommande(id).subscribe((rss)=>{
         commande=rss;
-        modalRef.componentInstance.commande=commande;
-        modalRef.componentInstance.produitCommande=produitCommande;
+        modalRef.componentInstance.commande=rss;
+        modalRef.componentInstance.produitCommande=rs;
         modalRef.componentInstance.passEntry.subscribe((receivedData) => {
           console.log("after change select produit valide ", receivedData);
+          commande.urlFactureGlobal=receivedData;
+          commande.produitCommandes=rs;
+          this.loginService.updateCommande(commande, commande.id).subscribe((rs) => {
+            if (rs == true) {
+              this.alertService.alert("Modification de la facture éffectué avec succes !", "success");
+              this.getData();
+            } else {
+              this.alertService.alert("Echec de la modification de la facture!", "warning");
+            }
 
+          }, e => {
+            console.error(e);
+
+          });
         });
       });
 
@@ -116,6 +130,7 @@ export class GererCommandeComponent{
       }
 
       let c={
+        id:receivedData.id,
         dateLivraison:receivedData.commande.dateLivraison,
         adresseLivraison:receivedData.commande.adresseLivraison,
         user:user,

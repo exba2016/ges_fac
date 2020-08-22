@@ -15,7 +15,7 @@ export class CommandeCreateUpdateComponent implements OnInit {
   @ViewChild('commande', { static: true }) table: any;
   SelectionType = SelectionType;
   @Input() public user;
- 
+
   valider: boolean;
   @Output() public passEntry = new EventEmitter<any>();
   form: FormGroup;
@@ -38,7 +38,7 @@ export class CommandeCreateUpdateComponent implements OnInit {
   ngOnInit(): void {
     this.valider = false;
     this.form = this.formBuilder.group({
-      
+
       dateLivraison:['', Validators.required],
       adresseLivraison:['', Validators.required],
       user:['',Validators.required]
@@ -48,7 +48,7 @@ export class CommandeCreateUpdateComponent implements OnInit {
       this.clients=rs;
     },error=>{
       console.error(error);
-      
+
     });
     if(this.user){
       this.form.patchValue({
@@ -61,7 +61,7 @@ export class CommandeCreateUpdateComponent implements OnInit {
         this.rows=[...rs];
       },err=>{
         console.error(err);
-        
+
       });
     }else{
       this.rows=[];
@@ -71,14 +71,16 @@ export class CommandeCreateUpdateComponent implements OnInit {
 
   get f() { return this.form.controls; }
 
-  
+
   onSubmit(){
     this.valider = true;
-
+    console.log("submit ",this.form);
     if(this.form.invalid){
+      console.log("submit ",this.form);
       return;
     }
     let c={
+      id:(this.user)?this.user.id:this.form.value.user,
       commande:this.form.value,
       listProduitCommande:this.rows,
       listDelete:this.listDelete
@@ -109,9 +111,9 @@ export class CommandeCreateUpdateComponent implements OnInit {
       row.qte=receivedData.qte;
       row.produit=receivedData.produit;
       this.rows.push(row);
-      
+
     });
-    
+
    return ;
 
   }
@@ -127,7 +129,7 @@ export class CommandeCreateUpdateComponent implements OnInit {
   }
 
   updateFilter(event) {
-  
+
   }
 
   onSelect(event) {
@@ -141,7 +143,7 @@ export class CommandeCreateUpdateComponent implements OnInit {
   }
 
   toggleExpandRow(row) {
-  
+
   }
 
   onDetailToggle(event) {

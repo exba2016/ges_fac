@@ -25,7 +25,8 @@ public class Paiement implements Serializable {
     private String code;
 
     private double montantPaye;
-    private String urlFacturePartielle;
+    @Lob
+    private byte[] urlFacturePartielle;
 
     private String statuts;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -64,11 +65,11 @@ public class Paiement implements Serializable {
         this.montantPaye = montantPaye;
     }
 
-    public String getUrlFacturePartielle() {
+    public byte[] getUrlFacturePartielle() {
         return urlFacturePartielle;
     }
 
-    public void setUrlFacturePartielle(String urlFacturePartielle) {
+    public void setUrlFacturePartielle(byte[] urlFacturePartielle) {
         this.urlFacturePartielle = urlFacturePartielle;
     }
 

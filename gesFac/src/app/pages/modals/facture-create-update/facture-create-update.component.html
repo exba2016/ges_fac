@@ -5,14 +5,17 @@
   </button>
 </div>
 <div class="modal-body">
-  <div class="container mt-5"  >
+  <div class="container mt-5" #htmlData>
     <div class="d-flex justify-content-center row">
-      <div class="col-md-8" id="htmlData" #htmlData>
+      <div class="col-md-8" id="htmlData" >
         <div class="p-3 bg-white rounded">
           <div class="row">
             <div class="col-md-6">
               <h1 class="text-uppercase">Facture</h1>
-              <div class="billed"><span class="font-weight-bold text-uppercase">Client:</span><span class="ml-1"></span></div>
+              <div class="billed">
+                <span class="font-weight-bold text-uppercase">Client:</span>
+                <span class="ml-1">{{commande.user.nom}}</span>
+              </div>
               <div class="billed"><span class="font-weight-bold text-uppercase">Date:</span><span class="ml-1">{{commande.createdAt}}</span></div>
               <div class="billed"><span class="font-weight-bold text-uppercase">Commande ID:</span><span class="ml-1">#{{commande.code}}</span></div>
             </div>

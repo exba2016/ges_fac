@@ -25,7 +25,8 @@ public class Commande implements Serializable {
     @NotBlank
     private String code;
 
-    private String urlFactureGlobal;
+    @Lob
+    private byte[] urlFactureGlobal;
 
     private String adresseLivraison;
 
@@ -81,11 +82,11 @@ public class Commande implements Serializable {
         this.code = code;
     }
 
-    public String getUrlFactureGlobal() {
+    public byte[] getUrlFactureGlobal() {
         return urlFactureGlobal;
     }
 
-    public void setUrlFactureGlobal(String urlFactureGlobal) {
+    public void setUrlFactureGlobal(byte[] urlFactureGlobal) {
         this.urlFactureGlobal = urlFactureGlobal;
     }
 

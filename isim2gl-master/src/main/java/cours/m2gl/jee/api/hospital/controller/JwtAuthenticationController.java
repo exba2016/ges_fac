@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 class CommandeModel implements Serializable {
     private Long id;
     private String code;
-    private String urlFactureGlobal;
+    private byte[] urlFactureGlobal;
     private String adresseLivraison;
     private double totalHT;
     private double totalTTC;
@@ -62,11 +62,11 @@ class CommandeModel implements Serializable {
         this.code = code;
     }
 
-    public String getUrlFactureGlobal() {
+    public byte[] getUrlFactureGlobal() {
         return urlFactureGlobal;
     }
 
-    public void setUrlFactureGlobal(String urlFactureGlobal) {
+    public void setUrlFactureGlobal(byte[] urlFactureGlobal) {
         this.urlFactureGlobal = urlFactureGlobal;
     }
 
@@ -582,7 +582,7 @@ public class JwtAuthenticationController {
                 }
 
             }
-            verifPaiementComplet(id);
+            verifPaiementComplet(p.getId());
             return true;
         }catch (Exception ex){
             ex.printStackTrace();
@@ -701,7 +701,12 @@ public class JwtAuthenticationController {
         return paiementRepository.getSommePaiementForCommande("supprimé",id);
     }
     public void verifPaiementComplet(Long id){
-        double total=paiementRepository.getSommePaiementForCommande("supprimé",id);
+        double total=0;
+        try{
+            total=paiementRepository.getSommePaiementForCommande("supprimé",id);
+        }catch (Exception e){
+
+        }
         Commande c=commandeRepository.findById(id).get();
 
         if(c.getTotalTTC()==total && !c.isPayed()){
