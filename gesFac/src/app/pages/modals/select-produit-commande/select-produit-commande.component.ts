@@ -28,7 +28,7 @@ export class SelectProduitCommandeComponent implements OnInit {
       qte: ['', Validators.required]
     });
 
-    this.loginService.getAllProduit().subscribe((rs) => {
+    this.loginService.getAllProduitDisponible().subscribe((rs) => {
       this.produits = rs;
     }, error => {
       console.error(error);
@@ -101,9 +101,11 @@ export class SelectProduitCommandeComponent implements OnInit {
       produit:p
     };
 
+    if(!(p && this.form.value.qte > (p.qte+((this.externalProduit)?this.externalProduit.qte:0)) ||  this.form.value.prix < p.prixMin)){
+      this.passEntry.emit(produitCommande);
+      this.activeModal.close();
+    }
 
-    this.passEntry.emit(produitCommande);
-    this.activeModal.close();
   }
 
 }

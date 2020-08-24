@@ -1,16 +1,19 @@
-import { jsPDF } from "jspdf";
-import html2canvas from 'html2canvas';import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {FormBuilder, FormGroup} from '@angular/forms';
+import {AlertService} from '../../services/alert.service';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {LoginService} from '../../services/login.service';
-import {AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {AlertService} from '../../services/alert.service';
-@Component({
-  selector: 'app-facture-create-update',
-  templateUrl: './facture-create-update.component.html',
-  styleUrls: ['./facture-create-update.component.scss']
-})
-export class FactureCreateUpdateComponent implements AfterViewInit{
+import html2canvas from 'html2canvas';
+import {jsPDF} from "jspdf";
 
+@Component({
+  selector: 'app-facture-partiel-create-update',
+  templateUrl: './facture-partiel-create-update.component.html',
+  styleUrls: ['./facture-partiel-create-update.component.scss']
+})
+export class FacturePartielCreateUpdateComponent implements AfterViewInit{
+
+  @Input() public montantApayer:any;
   @Input() public commande:any;
   @Input() public produitCommande:any;
   valider: boolean;
@@ -22,7 +25,7 @@ export class FactureCreateUpdateComponent implements AfterViewInit{
   }
 
   ngAfterViewInit(): void {
-    console.log("facture ",this.commande, " ",this.produitCommande," ", this.htmlData);
+    console.log("facture ",this.commande," montant A payer ",this.montantApayer, " ",this.produitCommande," ", this.htmlData);
     const DATA = this.htmlData.nativeElement;
     html2canvas(DATA).then((canvas)=>{
       console.log(this.htmlData.nativeElement);
@@ -34,16 +37,13 @@ export class FactureCreateUpdateComponent implements AfterViewInit{
       //doc.save(name);
       let data=doc.output("blob");
 
-
-      this.commande.produitCommandes=this.produitCommande;
-      this.loginService.addFactureGlobal(data,this.commande.id).subscribe((rs) => {
+      this.loginService.addFacturePartial(data,this.commande.id).subscribe((rs) => {
         if (rs) {
           this.alertService.alert("Modification de la facture éffectué avec succes !", "success");
         } else {
           this.alertService.alert("Echec de la modification de la facture!", "warning");
         }
         doc.save(name);
-
       }, e => {
         console.error(e);
 

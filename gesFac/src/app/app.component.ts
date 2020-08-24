@@ -15,8 +15,8 @@ export class AppComponent implements OnInit {
   constructor(
     public sidebarservice: SidebarService,
     public globalService: GlobalService,
-    private router: Router) { 
-      
+    private router: Router) {
+
     }
   ngOnInit(): void {
     this.router.events.forEach(event => {
@@ -34,7 +34,19 @@ export class AppComponent implements OnInit {
           this.globalService.user = user;
         }
         for(let m of this.sidebarservice.menus){
-          if(m.url && m.url===this.url && m.auth.role<this.globalService.user.role.name){
+          console.log("Sub Menu ",m);
+          if(m.submenus){
+            for(let sub of m.submenus){
+              if(sub.url && sub.url===this.url && sub.auth.role!=this.globalService.user.role.name){
+                if(this.globalService.user.role.name!="ROLE_ADMIN"){
+                  this.router.navigate(['/login']);
+                }
+
+              }
+            }
+          }else
+          if(m.url && m.url===this.url && m.auth.role!=this.globalService.user.role.name){
+
             this.router.navigate(['/login']);
           }
         }

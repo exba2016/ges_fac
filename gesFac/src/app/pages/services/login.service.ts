@@ -31,6 +31,9 @@ export class LoginService {
   public getAllClient():any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/users/client");
   }
+  public getAllClientWithNoActiveCommande():any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/users/client/notActiveCommande");
+  }
   public getAllClientWithActiveCommande():any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/users/ClientWithCommande");
   }
@@ -52,6 +55,9 @@ export class LoginService {
   public getAllProduit():any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/produits");
   }
+  public getAllProduitDisponible():any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/produits/disponible");
+  }
   public addProduit(produit:any):any{
     return this.http.post<any>(this.apiConfig.REST_API_SERVER+"/produits/add",produit);
   }
@@ -66,12 +72,34 @@ export class LoginService {
   public getAllCommande():any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes");
   }
+  public getAllCommandeOfClient(id):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes/client/"+id);
+  }
+  public getAllCommandeNotPayed():any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes/notPayed");
+  }
   public getAllCommandeByDate(dd:any,df:any):any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes/date?dd="+dd+"&df="+df);
+  }
+  public getAllCommandeByDateOfClient(dd:any,df:any,id):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes/client/"+id+"/date?dd="+dd+"&df="+df);
   }
   public addCommande(produit:any):any{
     return this.http.post<any>(this.apiConfig.REST_API_SERVER+"/commandes/add",produit);
   }
+  public addFactureGlobal(produit:any,id):any{
+    return this.http.post<any>(this.apiConfig.REST_API_SERVER+"/commandes/upload/"+id,produit);
+  }
+  public addFacturePartial(produit:any,id):any{
+    return this.http.post<any>(this.apiConfig.REST_API_SERVER+"/paiements/upload/"+id,produit);
+  }
+  public getFactureGlobal(id):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/commandes/upload/"+id);
+  }
+  public getFacturePartial(id):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/paiements/upload/"+id);
+  }
+
   public updateCommande(produit:any,id:number):any{
     return this.http.put<any>(this.apiConfig.REST_API_SERVER+"/commandes/update/"+id,produit);
   }
@@ -88,11 +116,14 @@ export class LoginService {
   public getAllPaiement():any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/paiements");
   }
-  public getAllPaiementOfClient(id:number):any{
+  public getAllPaiementOfClient(id):any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/paiements/"+id);
   }
   public getSommePaiementOfCommande(id:number):any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/paiements/somme/"+id);
+  }
+  public getPaiement(id:number):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/paiements/get/"+id);
   }
   public addPaiement(paiement:any):any{
     return this.http.post<any>(this.apiConfig.REST_API_SERVER+"/paiements/add",paiement);
@@ -102,6 +133,15 @@ export class LoginService {
   }
   public deletePaiement(id:number):any{
     return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/paiements/delete?id="+id);
+  }
+  public getStatsVenteAnnee():any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/stats/ventes/annee");
+  }
+  public getStatsVenteForHistogramme(annee):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/stats/ventes/annee/"+annee);
+  }
+  public getStatsVenteForClient(annee):any{
+    return this.http.get<any>(this.apiConfig.REST_API_SERVER+"/stats/ventes/client/"+annee);
   }
 
 

@@ -6,6 +6,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LoginService } from '../../services/login.service';
 import { ModalConfirmDialogComponent } from '../../modals/modal-confirm-dialog/modal-confirm-dialog.component';
 import {FactureCreateUpdateComponent} from '../../modals/facture-create-update/facture-create-update.component';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-gerer-commande',
@@ -88,22 +89,9 @@ export class GererCommandeComponent{
         commande=rss;
         modalRef.componentInstance.commande=rss;
         modalRef.componentInstance.produitCommande=rs;
-        modalRef.componentInstance.passEntry.subscribe((receivedData) => {
+        modalRef.componentInstance.passEntry.subscribe((receivedData) =>{
           console.log("after change select produit valide ", receivedData);
-          commande.urlFactureGlobal=receivedData;
-          commande.produitCommandes=rs;
-          this.loginService.updateCommande(commande, commande.id).subscribe((rs) => {
-            if (rs == true) {
-              this.alertService.alert("Modification de la facture éffectué avec succes !", "success");
-              this.getData();
-            } else {
-              this.alertService.alert("Echec de la modification de la facture!", "warning");
-            }
 
-          }, e => {
-            console.error(e);
-
-          });
         });
       });
 
@@ -152,6 +140,38 @@ export class GererCommandeComponent{
     });
 
   }
+   b64toBlob(b64Data, contentType, sliceSize) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+      var byteNumbers = new Array(slice.length);
+      for (var i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      var byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+  }
+  download(row=null){
+    this.loginService.getFactureGlobal(row.id).subscribe((rs)=>{
+      console.log("array buffer ",rs);
+      let base64= rs.urlFactureGlobal;
+      let file=this.b64toBlob(base64,"application/pdf",512);
+
+      saveAs(file);
+    });
+  }
   delete(row = null) {
     const modalRef = this.modalService.open(ModalConfirmDialogComponent);
     modalRef.componentInstance.title = 'SUPPRESSION D\'UNE COMMANDE';
@@ -181,27 +201,53 @@ export class GererCommandeComponent{
     user = JSON.parse(user);
     console.log("retrive force user ", user);
     this.user=user;
-    this.loginService.getAllCommande().subscribe((res) => {
-      console.log(res);
-      this.rows = res;
-      this.temp = this.rows;
-    });
+    if(user.role.name=="ROLE_ADMIN"){
+      this.loginService.getAllCommande().subscribe((res) => {
+        console.log(res);
+        this.rows = res;
+        this.temp = this.rows;
+      });
+    }else{
+      this.loginService.getAllCommandeOfClient(user.id).subscribe((res) => {
+        console.log(res);
+        this.rows = res;
+        this.temp = this.rows;
+      });
+    }
+
 
   }
   getFilterDataByDate() {
-    if(this.dd || this.df){
-      this.loginService.getAllCommandeByDate(this.dd,this.df).subscribe((rs)=>{
-        console.log("by date ",rs.values);
-        this.rows = rs;
-        this.temp = this.rows;
-      },err=>{
-        console.error(err);
+    if(this.user.role.name=="ROLE_ADMIN"){
+      if(this.dd || this.df){
+        this.loginService.getAllCommandeByDate(this.dd,this.df).subscribe((rs)=>{
+          console.log("by date ",rs.values);
+          this.rows = rs;
+          this.temp = this.rows;
+        },err=>{
+          console.error(err);
 
-      });
+        });
+      }else{
+        this.getData();
+
+      }
     }else{
-      this.getData();
+      if(this.dd || this.df){
+        this.loginService.getAllCommandeByDateOfClient(this.dd,this.df,this.user.id).subscribe((rs)=>{
+          console.log("by date ",rs.values);
+          this.rows = rs;
+          this.temp = this.rows;
+        },err=>{
+          console.error(err);
 
+        });
+      }else{
+        this.getData();
+
+      }
     }
+
 
 
   }

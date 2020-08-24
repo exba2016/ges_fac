@@ -10,5 +10,6 @@ import java.util.List;
 @Repository
 public interface ProduitRepository extends JpaRepository<Produit, Long> {
     public List<Produit> getAllByStatutsIsNotContaining(String s);
+    public List<Produit> getAllByStatutsIsNotContainingAndQteIsGreaterThan(String s,Double qte);
     public Produit findByCode(String c);
 }

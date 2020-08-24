@@ -6,6 +6,7 @@ import cours.m2gl.jee.api.hospital.dao.*;
 import cours.m2gl.jee.api.hospital.model.*;
 import cours.m2gl.jee.api.hospital.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,9 +20,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import sun.java2d.marlin.stats.Histogram;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -29,6 +35,40 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
+class histogramme implements Serializable{
+
+    private long id;
+    private String libelle;
+    private double prix;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getLibelle() {
+        return libelle;
+    }
+
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
+    }
+
+    public double getPrix() {
+        return prix;
+    }
+
+    public void setPrix(double prix) {
+        this.prix = prix;
+    }
+
+}
 class CommandeModel implements Serializable {
     private Long id;
     private String code;
@@ -284,8 +324,15 @@ public class JwtAuthenticationController {
     User findUser(@RequestBody String username){
         return userRepository.findByUsernameAndStatutsIsNotContaining(username,"supprimé");
     }
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @GetMapping("/users/client")
+    public @ResponseBody
+    List<User> getAllClient(){
+
+        return userRepository.getAllByStatutsIsNotContainingAndRoleName("supprimé",RoleName.ROLE_CLIENT);
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/users/client/notActiveCommande")
     public @ResponseBody
     List<User> findUserClient(){
 
@@ -381,14 +428,19 @@ public class JwtAuthenticationController {
     }
 
     //Produit
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @GetMapping("/produits")
     List<Produit> getAllProduits(){
         return produitRepository.getAllByStatutsIsNotContaining("supprimé");
     }
 
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/produits/disponible")
+    List<Produit> getAllProduitsDisponible(){
+        return produitRepository.getAllByStatutsIsNotContainingAndQteIsGreaterThan("supprimé",0.0);
+    }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @PostMapping("/produits/add")
     public @ResponseBody
     boolean addProduit(@RequestBody Produit produit){
@@ -409,7 +461,7 @@ public class JwtAuthenticationController {
             return false;
         }
     }
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @PutMapping("/produits/update/{id}")
     public @ResponseBody
     boolean updateProduit(@RequestBody Produit pr,@PathVariable Long id){
@@ -446,6 +498,17 @@ public class JwtAuthenticationController {
     List<Commande> getAllCommandes(){
         return commandeRepository.getAllByStatutsIsNotContaining("supprimé");
     }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/commandes/client/{id}")
+    List<Commande> getAllCommandesOfClient(@PathVariable Long id){
+        return commandeRepository.getAllCommandeOfClient("supprimé",id);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/commandes/notPayed")
+    List<Commande> getAllCommandesNotPayed(){
+        return commandeRepository.getAllCommandeNotPayed("supprimé");
+    }
 
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @GetMapping("/commandes/date")
@@ -463,6 +526,26 @@ public class JwtAuthenticationController {
         }else if(df != null && !df.isEmpty() && !df.trim().isEmpty() && !df.equals("undefined")){
             Date date_f= Date.from(LocalDate.parse(df).atStartOfDay(ZoneId.systemDefault()).toInstant());
             return commandeRepository.getAllByStatutsIsNotContainingAndCreatedAtIsLessThanEqual("supprimé",date_f);
+        }
+        System.out.println("allNull");
+        return new ArrayList<Commande>();
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/commandes/client/{id}/date")
+    List<Commande> getAllCommandesByDate(@RequestParam("dd") String dd,@RequestParam("df") String df,@PathVariable Long id)
+    {
+        System.out.println("ok user "+id);
+        if((dd != null && !dd.isEmpty() && !dd.trim().isEmpty() && !dd.equals("undefined")) && (df != null && !df.isEmpty() && !df.trim().isEmpty() && !df.equals("undefined"))){
+            Date date_d= Date.from(LocalDate.parse(dd).atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date date_f= Date.from(LocalDate.parse(df).atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+            return commandeRepository.getAllByStatutsIsNotContainingAndCreatedAtIsGreaterThanEqualAndCreatedAtIsLessThanEqualAndUserId("supprimé",date_d,date_f,id);
+        }else if(dd != null && !dd.isEmpty() && !dd.trim().isEmpty() && !dd.equals("undefined")){
+            Date date_d= Date.from(LocalDate.parse(dd).atStartOfDay(ZoneId.systemDefault()).toInstant());
+            return commandeRepository.getAllByStatutsIsNotContainingAndCreatedAtIsGreaterThanEqualAndUserId("supprimé",date_d,id);
+        }else if(df != null && !df.isEmpty() && !df.trim().isEmpty() && !df.equals("undefined")){
+            Date date_f= Date.from(LocalDate.parse(df).atStartOfDay(ZoneId.systemDefault()).toInstant());
+            return commandeRepository.getAllByStatutsIsNotContainingAndCreatedAtIsLessThanEqualAndUserId("supprimé",date_f,id);
         }
         System.out.println("allNull");
         return new ArrayList<Commande>();
@@ -499,7 +582,6 @@ public class JwtAuthenticationController {
                 c.setCreatedAt(Date.from(Instant.now()));
                 c.setUpdatedAt(Date.from(Instant.now()));
                 c.setDateLivraison(pc.getDateLivraison());
-                p.setUrlFactureGlobal(commande.getUrlFactureGlobal());
                 c.setProduit(pc.getProduit());
                 c.setQte(pc.getQte());
                 c.setPrix(pc.getPrix());
@@ -518,6 +600,7 @@ public class JwtAuthenticationController {
             return new Commande();
         }
     }
+
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @PutMapping("/commandes/update/{id}")
     public @ResponseBody
@@ -528,7 +611,6 @@ public class JwtAuthenticationController {
         p.setDateLivraison(commande.getDateLivraison());
         p.setTotalHT(totalHtTtc.get("totalHT"));
         p.setTotalTTC(totalHtTtc.get("totalTTC"));
-        p.setUrlFactureGlobal(commande.getUrlFactureGlobal());
         p.setUser(commande.getUser());
         p.setUpdatedAt(Date.from(Instant.now()));
         try{
@@ -556,7 +638,7 @@ public class JwtAuthenticationController {
                     ProduitCommande oldPc = new ProduitCommande();
                     oldPc = produitCommandeRepository.findById(pc.getId()).get();
 
-                    if (pc.getStatuts() != null && !pc.getStatuts().isEmpty() && pc.getStatuts() == "supprimé") {
+                    if (pc.getStatuts() != null && !pc.getStatuts().isEmpty() && pc.getStatuts().equals("supprimé") ) {
                         pc.setUpdatedAt(Date.from(Instant.now()));
                         Produit pr = produitRepository.findById(pc.getProduit().getId()).get();
                         pr.setQte(pr.getQte() + oldPc.getQte());
@@ -628,6 +710,91 @@ public class JwtAuthenticationController {
     }
 
     //Produit
+    @PostMapping("/commandes/upload/{id}")
+    public Commande uplaodFactureGlobal(@RequestBody byte[] file,@PathVariable Long id) throws IOException {
+        System.out.println("Original Image Byte Size - " + file.length);
+        Commande p =commandeRepository.findById(id).get();
+        p.setUrlFactureGlobal(compressBytes(file));
+        try {
+            commandeRepository.save(p);
+            return p;
+        }catch (Exception ex){
+            return new Commande();
+        }
+    }
+    @PostMapping("/paiements/upload/{id}")
+    public Paiement uplaodFacturePartial(@RequestBody byte[] file,@PathVariable Long id) throws IOException {
+        System.out.println("Original Image Byte Size - " + file.length);
+        Paiement p =paiementRepository.findById(id).get();
+        p.setUrlFacturePartielle(compressBytes(file));
+        try {
+            paiementRepository.save(p);
+            return p;
+        }catch (Exception ex){
+            return new Paiement();
+        }
+    }
+    @GetMapping("/paiements/upload/{id}")
+    public Paiement getFacturePartial(@PathVariable Long id) throws IOException {
+
+        Paiement p  = paiementRepository.findById(id).get();
+
+        p.setUrlFacturePartielle(decompressBytes(p.getUrlFacturePartielle()));
+
+        return p;
+
+    }
+    @GetMapping("/commandes/upload/{id}")
+    public Commande getFactureGlobal(@PathVariable Long id) throws IOException {
+
+        Commande p  = commandeRepository.findById(id).get();
+
+        p.setUrlFactureGlobal(decompressBytes(p.getUrlFactureGlobal()));
+
+        return p;
+
+    }
+
+    // compress the image bytes before storing it in the database
+    public static byte[] compressBytes(byte[] data) {
+        Deflater deflater = new Deflater();
+        deflater.setInput(data);
+        deflater.finish();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
+        byte[] buffer = new byte[1024];
+        while (!deflater.finished()) {
+            int count = deflater.deflate(buffer);
+            outputStream.write(buffer, 0, count);
+        }
+        try {
+            outputStream.close();
+        } catch (IOException e) {
+        }
+        System.out.println("Compressed Image Byte Size - " + outputStream.toByteArray().length);
+        return outputStream.toByteArray();
+    }
+        // uncompress the image bytes before returning it to the angular application
+    public static byte[] decompressBytes(byte[] data) {
+        Inflater inflater = new Inflater();
+        inflater.setInput(data);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
+        byte[] buffer = new byte[1024];
+        try {
+            while (!inflater.finished()) {
+                int count = inflater.inflate(buffer);
+                outputStream.write(buffer, 0, count);
+            }
+            outputStream.close();
+        } catch (IOException ioe) {
+
+        } catch (DataFormatException e) {
+        }
+        return outputStream.toByteArray();
+    }
+
+
+
+
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @GetMapping("/paiements")
     List<Paiement> getAllPaiement(){
@@ -639,12 +806,17 @@ public class JwtAuthenticationController {
     List<Paiement> getAllPaiement(@PathVariable Long id){
         return paiementRepository.getAllPaiementByClient("supprimé",id);
     }
-
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/paiements/get/{id}")
+    public @ResponseBody
+    Paiement getPaiement(@PathVariable Long id){
+        return paiementRepository.findById(id).get();
+    }
 
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @PostMapping("/paiements/add")
     public @ResponseBody
-    boolean addPaiement(@RequestBody Paiement paiement){
+    Paiement addPaiement(@RequestBody Paiement paiement){
         Paiement p=new Paiement();
         p.setCode(generateCode("paiement"));
         p.setCommande(paiement.getCommande());
@@ -657,16 +829,16 @@ public class JwtAuthenticationController {
         try{
             paiementRepository.save(p);
             verifPaiementComplet(paiement.getCommande().getId());
-            return true;
+            return p;
         }catch (Exception ex){
             ex.printStackTrace();
-            return false;
+            return new Paiement();
         }
     }
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
     @PutMapping("/paiements/update/{id}")
     public @ResponseBody
-    boolean updatePaiement(@RequestBody Paiement pr,@PathVariable Long id){
+    Paiement updatePaiement(@RequestBody Paiement pr,@PathVariable Long id){
         Paiement p=paiementRepository.findById(id).get();
         p.setMontantPaye(pr.getMontantPaye());
         p.setUpdatedAt(Date.from(Instant.now()));
@@ -674,10 +846,10 @@ public class JwtAuthenticationController {
         try{
             paiementRepository.save(p);
             verifPaiementComplet(p.getCommande().getId());
-            return true;
+            return p;
         }catch (Exception ex){
             ex.printStackTrace();
-            return false;
+            return new Paiement();
         }
     }
     @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
@@ -688,7 +860,7 @@ public class JwtAuthenticationController {
         u.setStatuts("supprimé");
         try{
             paiementRepository.save(u);
-            verifPaiementComplet(id);
+            verifPaiementComplet(u.getCommande().getId());
             return true;
         }catch (Exception ex){
             return false;
@@ -698,7 +870,11 @@ public class JwtAuthenticationController {
     @GetMapping("/paiements/somme/{id}")
     public @ResponseBody
     double getSommePaiementForCommande(@PathVariable Long id){
-        return paiementRepository.getSommePaiementForCommande("supprimé",id);
+        try{
+            return paiementRepository.getSommePaiementForCommande("supprimé",id);
+        }catch (Exception ex){
+            return 0;
+        }
     }
     public void verifPaiementComplet(Long id){
         double total=0;
@@ -709,8 +885,14 @@ public class JwtAuthenticationController {
         }
         Commande c=commandeRepository.findById(id).get();
 
+        if(total==0){
+            c.setPayedPartial(false);
+        }else if(total<c.getTotalTTC()){
+            c.setPayedPartial(true);
+        }
         if(c.getTotalTTC()==total && !c.isPayed()){
             c.setPayed(true);
+            c.setPayedPartial(false);
             commandeRepository.save(c);
         }else{
             c.setPayed(false);
@@ -748,5 +930,55 @@ public class JwtAuthenticationController {
         }
         return code;
     }
+
+    //Statistiques
+
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/stats/ventes/annee")
+    List<Integer> getStatsVentes(){
+        return produitCommandeRepository.getAllAnnee("supprimé");
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/stats/ventes/annee/{annee}")
+    List<histogramme> getStatsVentes(@PathVariable Integer annee){
+        List<histogramme>lh=new ArrayList<>();
+        for(ProduitCommande p:produitCommandeRepository.getStatsVenteByAnnee("supprimé",annee.toString())){
+            histogramme h =lh.stream().filter((hs)->hs.getId()==p.getProduit().getId()).findAny().orElse(null);
+            if(h==null){
+                h=new histogramme();
+                h.setId(p.getProduit().getId());
+                h.setLibelle(p.getProduit().getLibelle());
+                h.setPrix(p.getPrix()*p.getQte()+((p.getPrix()*p.getQte()*0.18)));
+                lh.add(h);
+            }else{
+                lh.remove(h);
+                h.setPrix(h.getPrix()+((p.getPrix()*p.getQte())+((p.getPrix()*p.getQte()*0.18))));
+                lh.add(h);
+            }
+        }
+        return lh;
+    }
+    @PreAuthorize("hasAuthority('ROLE_CLIENT') or hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/stats/ventes/client/{annee}")
+    List<histogramme> getStatsVentesClient(@PathVariable Integer annee){
+        List<histogramme>lh=new ArrayList<>();
+        for(ProduitCommande p:produitCommandeRepository.getStatsVenteByAnnee("supprimé",annee.toString())){
+            histogramme h =lh.stream().filter((hs)->hs.getId()==p.getCommande().getUser().getId()).findAny().orElse(null);
+            if(h==null){
+                h=new histogramme();
+                h.setId(p.getCommande().getUser().getId());
+                h.setLibelle(p.getCommande().getUser().getNom());
+                h.setPrix(p.getPrix()*p.getQte()+((p.getPrix()*p.getQte()*0.18)));
+                lh.add(h);
+            }else{
+                lh.remove(h);
+                h.setPrix(h.getPrix()+((p.getPrix()*p.getQte())+((p.getPrix()*p.getQte()*0.18))));
+                lh.add(h);
+            }
+        }
+        return lh;
+    }
+
 
 }

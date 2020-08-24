@@ -37,6 +37,7 @@ public class Commande implements Serializable {
     private Date dateLivraison;
 
     private boolean isPayed;
+    private boolean isPayedPartial;
 
     private String statuts;
     @Temporal(TemporalType.TIMESTAMP)
@@ -57,6 +58,14 @@ public class Commande implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "commande",cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Paiement>paiements;
+
+    public boolean isPayedPartial() {
+        return isPayedPartial;
+    }
+
+    public void setPayedPartial(boolean payedPartial) {
+        isPayedPartial = payedPartial;
+    }
 
     public boolean isValide() {
         return isValide;
@@ -82,13 +91,6 @@ public class Commande implements Serializable {
         this.code = code;
     }
 
-    public byte[] getUrlFactureGlobal() {
-        return urlFactureGlobal;
-    }
-
-    public void setUrlFactureGlobal(byte[] urlFactureGlobal) {
-        this.urlFactureGlobal = urlFactureGlobal;
-    }
 
     public double getTotalHT() {
         return totalHT;
@@ -106,6 +108,13 @@ public class Commande implements Serializable {
         this.totalTTC = totalTTC;
     }
 
+    public byte[] getUrlFactureGlobal() {
+        return urlFactureGlobal;
+    }
+
+    public void setUrlFactureGlobal(byte[] urlFactureGlobal) {
+        this.urlFactureGlobal = urlFactureGlobal;
+    }
 
     public Date getDateLivraison() {
         return dateLivraison;

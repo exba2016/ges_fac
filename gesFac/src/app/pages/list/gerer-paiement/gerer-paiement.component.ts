@@ -8,7 +8,8 @@ import {PaiementCreateUpdateComponent} from '../../modals/paiement-create-update
 import {GlobalService} from '../../services/global.service';
 import { SelectionType } from '@swimlane/ngx-datatable';
 import {FactureCreateUpdateComponent} from '../../modals/facture-create-update/facture-create-update.component';
-
+import {FacturePartielCreateUpdateComponent} from '../../modals/facture-partiel-create-update/facture-partiel-create-update.component';
+import { saveAs } from 'file-saver';
 @Component({
   selector: 'app-gerer-paiement',
   templateUrl: './gerer-paiement.component.html',
@@ -42,7 +43,7 @@ export class GererPaiementComponent {
     public loginService: LoginService
   ) {
     this.getData();
-    this.loginService.getAllClientWithActiveCommande().subscribe((rs)=>{
+    this.loginService.getAllClient().subscribe((rs)=>{
       this.clients=rs;
     });
   }
@@ -54,8 +55,9 @@ export class GererPaiementComponent {
     modalRef.componentInstance.passEntry.subscribe((receivedData) => {
       console.log("after change password valide ", receivedData);
       this.loginService.addPaiement(receivedData).subscribe((rss) => {
-        if (rss == true) {
+        if (rss) {
           this.alertService.alert("Ajout éffectué avec succes !", "success");
+          this.getFacture(rss.id);
           this.getData();
         } else {
           this.alertService.alert("Echec de l'ajout !", "warning");
@@ -67,7 +69,31 @@ export class GererPaiementComponent {
 
     });
   }
+  getFacture(id){
+    const modalRef = this.modalService.open(FacturePartielCreateUpdateComponent,{ size: 'lg' });
+    let produitCommande;
+    let commande;
+    this.loginService.getPaiement(id).subscribe((res_paiement)=>{
+      console.log("paiement view ",res_paiement);
+      this.loginService.getAllProduitCommandeByCommande(res_paiement.commande.id).subscribe((rs)=>{
+        produitCommande=rs;
+        this.loginService.getSommePaiementOfCommande(res_paiement.commande.id).subscribe((montant)=>{
+          modalRef.componentInstance.montantApayer=montant;
+          modalRef.componentInstance.commande=res_paiement;
+          modalRef.componentInstance.produitCommande=rs;
+          modalRef.componentInstance.passEntry.subscribe((receivedData) =>{
+            console.log("after change select produit valide ", receivedData);
 
+          });
+        });
+
+      });
+    });
+
+
+
+
+  }
   update(row = null) {
     console.log("row ", row);
     const modalRef = this.modalService.open(PaiementCreateUpdateComponent);
@@ -75,8 +101,9 @@ export class GererPaiementComponent {
     modalRef.componentInstance.passEntry.subscribe((receivedData) => {
       console.log("receiv ", receivedData);
       this.loginService.updatePaiement(receivedData, row.id).subscribe((rs) => {
-        if (rs == true) {
+        if (rs) {
           this.alertService.alert("Modification éffectué avec succes !", "success");
+          this.getFacture(rs.id);
           this.getData();
         } else {
           this.alertService.alert("Echec de la modification !", "warning");
@@ -104,6 +131,7 @@ export class GererPaiementComponent {
               this.getData();
             } else {
               this.alertService.alert("Echec de la suppression !", "warning");
+              this.getData();
             }
 
           },
@@ -114,10 +142,43 @@ export class GererPaiementComponent {
 
   }
   getDataForClient(){
-    this.loginService.getAllPaiementOfClient(this.client.id).subscribe((res) => {
+    console.log("Client ",this.client);
+    this.loginService.getAllPaiementOfClient(this.client).subscribe((res) => {
       console.log(res.values);
       this.rows = res;
       this.temp = this.rows;
+    });
+  }
+  b64toBlob(b64Data, contentType, sliceSize) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+      var byteNumbers = new Array(slice.length);
+      for (var i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      var byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+  }
+  download(row=null){
+    this.loginService.getFacturePartial(row.id).subscribe((rs)=>{
+      console.log("array buffer ",rs);
+      let base64= rs.urlFacturePartielle;
+      let file=this.b64toBlob(base64,"application/pdf",512);
+
+      saveAs(file);
     });
   }
   getData() {

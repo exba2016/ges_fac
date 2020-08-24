@@ -12,6 +12,7 @@ import {FactureCreateUpdateComponent} from '../facture-create-update/facture-cre
   styleUrls: ['./paiement-create-update.component.scss']
 })
 export class PaiementCreateUpdateComponent implements OnInit {
+  currentUser;
   commande;
   @Input() public user;
   montantRestant;
@@ -30,7 +31,11 @@ export class PaiementCreateUpdateComponent implements OnInit {
       montantPaye:['', Validators.required],
       commande:['',Validators.required]
     });
-    this.loginService.getAllCommande().subscribe((rs)=>{
+    let user:any = localStorage.getItem('user');
+    user = JSON.parse(user);
+    console.log("retrive force user ", user);
+    this.currentUser=user;
+    this.loginService.getAllCommandeNotPayed().subscribe((rs)=>{
       this.commandes=rs;
     },error=>{
       console.error(error);
@@ -49,7 +54,8 @@ export class PaiementCreateUpdateComponent implements OnInit {
 
   }
   calculeMontant(){
-      let p = this.commandes.filter(r => r.id == this.form.value.commande)[0];
+      let p = this.user?this.user.commande:this.commandes.filter(r => r.id == this.form.value.commande)[0];
+    console.log("calcul montant ",p," user ",this.user," commandes ",this.commandes);
       this.loginService.getSommePaiementOfCommande(p.id).subscribe((rs)=>{
        this.montantRestant=(p.totalTTC-rs);
       });
@@ -60,13 +66,34 @@ export class PaiementCreateUpdateComponent implements OnInit {
     if (this.form.value.commande) {
       this.calculeMontant();
       console.log(this.form.value);
-      let p = this.commandes.filter(r => r.id == this.form.value.commande)[0];
+      let p =this.user?this.user.commande: this.commandes.filter(r => r.id == this.form.value.commande)[0];
       this.loginService.getSommePaiementOfCommande(p.id).subscribe((rs)=>{
-        if (p && (this.form.value.montantPaye-rs) > (p.totalTTC-rs)) {
-          this.alertService.alert("Le montant saisi est supérrieur au montant restant a payé pour cette commande. Il vous reste a payé "+rs+" FCFA !", "warning");
-          this.form.patchValue({
-            montantPaye: 0
-          })
+        console.log("verif prix ",this.form.value.montantPaye>(p.totalTTC-rs));
+        if (!this.user && p && (this.form.value.montantPaye>(p.totalTTC-rs))) {
+          this.alertService.alert("Le montant saisi est supérrieur au montant restant a payé pour cette commande. Il vous reste a payé "+(p.totalTTC-rs)+" FCFA !", "warning");
+          if(this.user){
+
+            this.form.patchValue({
+              montantPaye:this.user.montantPaye
+            })
+          }else{
+            this.form.patchValue({
+              montantPaye: 0
+            })
+          }
+
+        }else if(this.user && p && (this.form.value.montantPaye>(p.totalTTC-(rs-this.user.montantPaye)))){
+          this.alertService.alert("Le montant saisi est supérrieur au montant restant a payé pour cette commande. Il vous reste a payé "+(p.totalTTC-rs)+" FCFA !", "warning");
+          if(this.user){
+
+            this.form.patchValue({
+              montantPaye:this.user.montantPaye
+            })
+          }else{
+            this.form.patchValue({
+              montantPaye: 0
+            })
+          }
         }
       });
 
@@ -86,30 +113,36 @@ export class PaiementCreateUpdateComponent implements OnInit {
       return;
     }
     let p;
-    p = this.commandes.filter(r => r.id == this.form.value.commande)[0];
+    p = this.user?this.user:this.commandes.filter(r => r.id == this.form.value.commande)[0];
     let ok=this.loginService.getSommePaiementOfCommande(p.id).subscribe((rs)=> {
-      if ((this.form.value.montantPaye-rs) > (p.totalTTC-rs)) {
-        this.alertService.alert("Le montant saisi est supérrieur au montant restant a payé pour cette commande. Il vous reste a payé " + rs + " FCFA !", "warning");
+      if (!this.user && p && this.form.value.montantPaye>(p.totalTTC-rs)) {
+        this.alertService.alert("Le montant saisi est supérrieur au montant restant a payé pour cette commande. Il vous reste a payé " +(p.totalTTC-rs) + " FCFA !", "warning");
         this.form.patchValue({
           montantPaye: 0
         });
-        return false;
-      }else{
         return true;
+      }else if(this.user && p && (this.form.value.montantPaye>(p.totalTTC-(rs-this.user.montantPaye)))){
+        this.alertService.alert("Le montant saisi est supérrieur au montant restant a payé pour cette commande. Il vous reste a payé " +(p.totalTTC-rs) + " FCFA !", "warning");
+        this.form.patchValue({
+          montantPaye: this.user.montantPaye
+        });
+        return true;
+      }else{
+        let c={
+          montantPaye:this.form.value.montantPaye,
+          commande:{id:this.form.value.commande}
+        };
+        this.passEntry.emit(c);
+        this.activeModal.close();
+        return false;
       }
     });
-    if(!ok){
+    if(ok){
       return ;
     }
 
-    let c={
-      montantPaye:this.form.value.montantPaye,
-      commande:{id:this.form.value.commande}
-    };
 
 
-    this.passEntry.emit(c);
-    this.activeModal.close();
   }
 
 }

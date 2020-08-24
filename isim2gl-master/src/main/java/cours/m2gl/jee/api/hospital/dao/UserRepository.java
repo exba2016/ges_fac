@@ -15,6 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
     public List<User>getAllByStatutsIsNotContaining(String s);
+    public List<User>getAllByStatutsIsNotContainingAndRoleName(String s,RoleName r);
 
     @Query("SELECT u FROM User u JOIN u.role r WHERE u.statuts<>?1 AND u.role.name =?2 AND not exists (SELECT c FROM Commande c WHERE c.statuts<>?1 AND c.user=u AND c.isPayed=false )")
     List<User>getAllClientNotHaveActiveCommande(String s, RoleName r);

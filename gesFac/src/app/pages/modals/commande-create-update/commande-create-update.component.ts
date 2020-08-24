@@ -15,7 +15,7 @@ export class CommandeCreateUpdateComponent implements OnInit {
   @ViewChild('commande', { static: true }) table: any;
   SelectionType = SelectionType;
   @Input() public user;
-
+  currentUser;
   valider: boolean;
   @Output() public passEntry = new EventEmitter<any>();
   form: FormGroup;
@@ -44,7 +44,12 @@ export class CommandeCreateUpdateComponent implements OnInit {
       user:['',Validators.required]
     });
 
-    this.loginService.getAllClient().subscribe((rs)=>{
+    let user:any = localStorage.getItem('user');
+    user = JSON.parse(user);
+    console.log("retrive force user ", user);
+    this.currentUser=user;
+
+    this.loginService.getAllClientWithNoActiveCommande().subscribe((rs)=>{
       this.clients=rs;
     },error=>{
       console.error(error);

@@ -1,1 +1,49 @@
-<p>accueil works!</p>
+<div class="modal-body">
+  <div class="row">
+
+    <div class="col-sm-6" *ngIf="user && user.role.name=='ROLE_ADMIN'">
+      <div class="form-group">
+        <label >Séléctionner un année</label>
+        <select #myClient [(ngModel)]="annee" (ngModelChange)="getAllAnnee()" required="required" class="form-control">
+          <option *ngFor='let s of listAnnee' value="{{s}}">{{s}}</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-sm-6" *ngIf="user && user.role.name=='ROLE_ADMIN' && annee">
+      <div class="form-group">
+        <label >Séléctionner un type de graphique</label>
+        <select #graph [(ngModel)]="selectedGraph" (ngModelChange)="graph_init()" required="required" class="form-control">
+          <option *ngFor='let s of listGraphs' value="{{s}}">{{s}}</option>
+        </select>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="margin" *ngIf="selectedGraph && selectedGraph=='Histogramme'">
+    <ngx-charts-bar-vertical
+      [view]="[1000,400]"
+      [results]="listHisto"
+      [xAxis]="showXAxis"
+      [yAxis]="showYAxis"
+      [legend]="showLegend"
+      [showXAxisLabel]="showXAxisLabel"
+      [showYAxisLabel]="showYAxisLabel"
+      [xAxisLabel]="'Produits'"
+      [legendTitle]="'Vente / Produit'"
+      [yAxisLabel]="'Revenu'"
+      (select)="onSelect($event)"
+      (activate)="onActivate($event)"
+      (deactivate)="onDeactivate($event)">
+    </ngx-charts-bar-vertical>
+  </div>
+  <div class="margin" *ngIf="selectedGraph && selectedGraph!='Histogramme'">
+    <ngx-charts-advanced-pie-chart
+      [view]="view"
+      [results]="listBar"
+      [label]="'Total des revenu Vente / Client'"
+      [gradient]="gradient"
+    >
+    </ngx-charts-advanced-pie-chart>
+  </div>
+</div>

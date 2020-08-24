@@ -25,6 +25,7 @@ public class Paiement implements Serializable {
     private String code;
 
     private double montantPaye;
+
     @Lob
     private byte[] urlFacturePartielle;
 

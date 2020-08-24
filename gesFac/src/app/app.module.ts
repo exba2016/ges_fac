@@ -28,6 +28,8 @@ import { CommandeCreateUpdateComponent } from './pages/modals/commande-create-up
 import { SelectProduitCommandeComponent } from './pages/modals/select-produit-commande/select-produit-commande.component';
 import { PaiementCreateUpdateComponent } from './pages/modals/paiement-create-update/paiement-create-update.component';
 import { FactureCreateUpdateComponent } from './pages/modals/facture-create-update/facture-create-update.component';
+import { FacturePartielCreateUpdateComponent } from './pages/modals/facture-partiel-create-update/facture-partiel-create-update.component';
+import {NgxChartsModule} from '@swimlane/ngx-charts';
 
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
@@ -52,7 +54,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     CommandeCreateUpdateComponent,
     SelectProduitCommandeComponent,
     PaiementCreateUpdateComponent,
-    FactureCreateUpdateComponent
+    FactureCreateUpdateComponent,
+    FacturePartielCreateUpdateComponent
   ],
   imports: [
     BrowserModule,
@@ -71,6 +74,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
         selectedMessage: 'selected' // Footer selected message
       }
     }),
+    NgxChartsModule,
     ToastrModule.forRoot({
     positionClass: 'toast-top-center'
     }), // ToastrModule added
