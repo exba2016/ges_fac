@@ -38,14 +38,14 @@
     "ngx-bootstrap": "^5.6.1",
     "ngx-perfect-scrollbar": "^9.0.0",
     "ngx-toastr": "^13.0.0",
-    "npm": "^6.14.8",
+    "npm": "^9.6.5",
     "rxjs": "~6.5.5",
     "tslib": "^2.0.1",
     "zone.js": "~0.10.3"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.1000.7",
-    "@angular/cli": "^10.0.7",
+    "@angular/cli": "^15.2.6",
     "@angular/compiler-cli": "^10.0.11",
     "@types/jasmine": "^3.5.13",
     "@types/jasminewd2": "~2.0.3",
